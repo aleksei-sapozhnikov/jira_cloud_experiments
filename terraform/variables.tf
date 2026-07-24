@@ -1,15 +1,15 @@
 variable "jira_profile_reconciliation_mode" {
   description = "Controls when Jira project-to-scheme associations are reconciled"
   type        = string
-  default     = "on_change"
+  default     = "on_terraform_change"
 
   validation {
     condition = contains(
-      ["on_change", "always"],
+      ["on_terraform_change", "always"],
       var.jira_profile_reconciliation_mode
     )
 
-    error_message = "jira_profile_reconciliation_mode must be on_change or always."
+    error_message = "jira_profile_reconciliation_mode must be on_terraform_change or always."
   }
 }
 

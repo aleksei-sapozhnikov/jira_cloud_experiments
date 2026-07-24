@@ -15,13 +15,13 @@ After one apply, the demonstration contains:
 - an incident-report form with text, radio, checkbox, date, and paragraph questions;
 - Terraform outputs with the created space and scheme identifiers.
 
-A second plan in the default `on_change` mode reports:
+A second plan in the default `on_terraform_change` mode reports:
 
 ```text
 No changes. Your infrastructure matches the configuration.
 ```
 
-This is the shortest successful check for the portfolio demonstration. The `always` mode is a separate drift-reconciliation experiment and intentionally produces a reconciliation action on every apply.
+This is the shortest successful check for the portfolio demonstration. The `always` mode is a separate drift-reconciliation experiment and intentionally places a reconciliation action in every plan. The script runs only when that plan is applied.
 
 ## Table of contents
 
@@ -129,7 +129,7 @@ The root configuration passes the same explicit setting to every current module 
 reconciliation_mode = var.jira_profile_reconciliation_mode
 ```
 
-The root variable defaults to `on_change`. Override it for a run through `TF_VAR_jira_profile_reconciliation_mode`, the `-var` CLI option, or a literal in the module call. No `.tfvars` file is required.
+The root variable defaults to `on_terraform_change`. Override it for a run through `TF_VAR_jira_profile_reconciliation_mode`, the `-var` CLI option, or a literal in the module call. No `.tfvars` file is required.
 
 ## Authentication and inputs
 
@@ -147,7 +147,7 @@ The project lead is a required Terraform variable:
 TF_VAR_jira_project_lead_account_id
 ```
 
-The optional profile-assignment mode defaults to `on_change`:
+The optional profile-assignment mode defaults to `on_terraform_change`:
 
 ```text
 TF_VAR_jira_profile_reconciliation_mode
@@ -255,7 +255,7 @@ No changes. Your infrastructure matches the configuration.
 
 ## Reconciliation modes
 
-### `on_change`
+### `on_terraform_change`
 
 Use this for a clean demonstration. Terraform executes the association script when:
 
@@ -266,7 +266,7 @@ Use this for a clean demonstration. Terraform executes the association script wh
 
 ### `always`
 
-Use this when every apply should inspect live Jira associations:
+Use this when every plan should include a live Jira association check if applied:
 
 ```sh
 TF_VAR_jira_profile_reconciliation_mode=always \
@@ -276,9 +276,9 @@ terraform apply tfplan
 
 Expected result: the reconciliation `terraform_data` resource is intentionally replaced, the script checks live Jira associations, and `PUT` requests are sent only for associations that differ.
 
-In this mode Terraform intentionally replaces the `terraform_data` reconciliation resource on every apply. It does not replace the Jira space or the schemes.
+In this mode every plan proposes replacement of the `terraform_data` reconciliation resource. The replacement and script run occur only when the plan is applied. Jira spaces and schemes are not replaced.
 
-When switching from `always` back to `on_change`, set the environment variable back to `on_change` and apply once. The next plan can then be clean.
+When switching from `always` back to `on_terraform_change`, set the environment variable back to `on_terraform_change` and apply once. The next plan can then be clean.
 
 ## Why a REST script is used
 

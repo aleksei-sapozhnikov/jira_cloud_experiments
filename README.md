@@ -42,7 +42,7 @@ The Jira Automation rule that creates the RCA Task is an external part of the de
 ## What I explored
 
 - **Where a Terraform provider stops being enough.** The selected provider creates Jira objects, while a small idempotent REST reconciler fills the project-to-scheme association gap.
-- **Two reconciliation strategies.** `on_change` produces a clean portfolio demonstration; `always` checks live Jira associations and repairs supported drift on every apply.
+- **Two reconciliation strategies.** `on_terraform_change` produces a clean portfolio demonstration; `always` places reconciliation in every plan so applied plans repair supported drift.
 - **Native Jira extension with Forge.** A read-only UI Kit app adds operational context without a separate frontend hosting stack.
 - **Safe webhook processing.** The Lambda receiver verifies the raw-body HMAC signature before processing and uses a conditional DynamoDB write for delivery idempotency.
 - **Automation boundaries.** ScriptRunner creates or checks relationships, Jira Automation owns RCA creation, and inconsistent states remain visible instead of being guessed away.
@@ -175,8 +175,8 @@ Add that line to `jira-cloud-iac-dev.env` and restart the container before runni
 
 Terraform creates three demonstration spaces, generates a reusable configuration profile, associates its schemes with the company-managed space, and creates a Jira Form through the official Forms REST API. The repository supports:
 
-- `on_change` reconciliation for a clean second plan;
-- `always` reconciliation for a live association check on every apply.
+- `on_terraform_change` reconciliation for a clean second plan;
+- `always` reconciliation in every plan for live association checks when that plan is applied.
 - native create/read/update/delete lifecycle for the form template.
 
 ### Reproduce

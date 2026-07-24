@@ -16,7 +16,7 @@ resource "terraform_data" "assignment" {
   })
 
   /*
-   * on_change:
+   * on_terraform_change:
    *   Run only when desired IDs or this module's helper script change.
    *
    * always:

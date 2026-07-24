@@ -53,14 +53,14 @@ variable "profile_key" {
 variable "reconciliation_mode" {
   description = "Controls when the module checks and applies Jira scheme assignments"
   type        = string
-  default     = "on_change"
+  default     = "on_terraform_change"
 
   validation {
     condition = contains(
-      ["on_change", "always"],
+      ["on_terraform_change", "always"],
       var.reconciliation_mode
     )
 
-    error_message = "reconciliation_mode must be on_change or always."
+    error_message = "reconciliation_mode must be on_terraform_change or always."
   }
 }

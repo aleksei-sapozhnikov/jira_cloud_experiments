@@ -183,7 +183,7 @@ Terraform creates three demonstration spaces, including a team-managed Jira Serv
 - `always` reconciliation in every plan for live association checks when that plan is applied.
 - native create/read/update/delete lifecycle for the form template.
 
-The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Incident` work type expected by the form. Terraform resolves its site-specific ID by name and publishes the form for Incident creation.
+The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Report an incident` work type expected by the form. Terraform resolves its site-specific ID by name and publishes the form for incident creation.
 
 ### Reproduce
 

@@ -110,7 +110,9 @@ The demonstration supports `short_text`, `long_text`, `paragraph`, `radio`, `che
 
 The work type is selected by its readable name in JSON rather than by a site-specific numeric ID. The root configuration reads the work types belonging to the target space, resolves exactly one matching ID, and passes that ID directly to the form module. The ID is also included in `jira_forms` output for inspection; outputs are not used as inputs inside the same Terraform configuration.
 
-The `TFJSM` space uses the team-managed ITSM template, which supplies the standard-level `Incident` work type expected by the demonstration form. Terraform reports a targeted validation error if the configured name is absent or ambiguous.
+The `TFJSM` space uses the team-managed ITSM template, which supplies the standard-level `Report an incident` work type expected by the demonstration form. Terraform reports a targeted validation error if the configured name is absent or ambiguous.
+
+In the team-managed JSM UI, the template-provided work categories are managed primarily as request types under **Space settings → Request management → Request types**. Forms are managed under **Space settings → Request management → Forms**; neither page is necessarily shown in the space's main operational sidebar.
 
 ## Jira Forms module
 
@@ -326,7 +328,7 @@ For the interview demonstration:
 - Jira Free does not allow creation of custom permission schemes. The supplied profile therefore disables permission-scheme creation.
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
-- Jira's public API does not independently create project-scoped work types inside team-managed spaces. The selected JSM ITSM project template supplies `Incident`; Terraform then resolves its ID by name and manages the form publication.
+- Jira's public API does not independently create project-scoped work types inside team-managed spaces. The selected JSM ITSM project template supplies `Report an incident`; Terraform then resolves its ID by name and manages the form publication.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
 - The container entrypoint maps Jira credentials to Terraform variables for the generic REST provider; Terraform runs outside the development image must provide those two `TF_VAR_*` variables explicitly.
 - The form is published for Jira work-item creation. Publishing to Jira Service Management request types or a customer portal is intentionally omitted.

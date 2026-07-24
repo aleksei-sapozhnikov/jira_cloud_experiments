@@ -169,7 +169,7 @@ The generic REST provider does not read the `ATLASSIAN_*` variables used by the 
 
 After configuring the Jira URL, email, and API token, run from `/workspace`:
 
-```sh
+```bash
 node terraform/scripts/show-jira-identifiers.mjs
 ```
 
@@ -206,7 +206,7 @@ The container entrypoint reuses these values as `TF_VAR_jira_forms_email` and `T
 
 Inside the development container, use the `tf` alias. It runs the executable selected by `TF_CLI` in `jira-cloud-iac-dev.env` (`terraform` by default, or `tofu` when OpenTofu is installed in the image):
 
-```sh
+```bash
 cd /workspace/terraform
 tf init
 tf fmt -recursive
@@ -217,14 +217,14 @@ Expected result: initialization completes, formatting produces no unexpected cha
 
 Review the plan and apply demonstration mode:
 
-```sh
+```bash
 tf plan -out=tfplan
 tf apply tfplan
 ```
 
 Inspect the resulting Terraform outputs:
 
-```sh
+```bash
 tf output jira_spaces
 tf output jira_configuration_profiles
 tf output jira_profile_assignments
@@ -233,7 +233,7 @@ tf output jira_forms
 
 Then confirm the stable result:
 
-```sh
+```bash
 tf plan
 ```
 
@@ -265,7 +265,7 @@ Use this for a clean demonstration. Terraform executes the association script wh
 
 Use this when every plan should include a live Jira association check if applied:
 
-```sh
+```bash
 TF_VAR_jira_profile_reconciliation_mode=always \
   tf plan -out=tfplan
 tf apply tfplan

@@ -62,7 +62,7 @@ The account must be allowed to deploy the Forge app and install it on the target
 
 Inside the development container:
 
-```sh
+```bash
 cd /workspace/custom-apps/incident-rca-status
 npm ci
 ```
@@ -73,7 +73,7 @@ Expected result: dependencies are installed successfully and `package-lock.json`
 
 ## Validate, deploy, and install
 
-```sh
+```bash
 forge whoami
 forge lint
 forge deploy --non-interactive -e development
@@ -96,13 +96,13 @@ Expected result:
 
 For ordinary source-code updates:
 
-```sh
+```bash
 forge deploy --non-interactive -e development
 ```
 
 When scopes or installation permissions change:
 
-```sh
+```bash
 forge install --non-interactive --upgrade \
   --site "$ATLASSIAN_URL" \
   --product jira \

@@ -86,7 +86,7 @@ The root container is used by the Terraform and Forge experiments and by the Jir
 
 Copy the committed template:
 
-```sh
+```bash
 cp jira-cloud-iac-dev.env.example jira-cloud-iac-dev.env
 ```
 
@@ -112,7 +112,7 @@ The container also provides the `tf` alias for Terraform-compatible commands. It
 
 Docker:
 
-```sh
+```bash
 docker build -t jira-cloud-iac-dev .
 docker run --rm -it \
   --env-file "$PWD/jira-cloud-iac-dev.env" \
@@ -153,7 +153,7 @@ The repository is mounted at `/workspace`. Named volumes retain npm and Terrafor
 
 Inside the container:
 
-```sh
+```bash
 pwd
 node --version
 forge --version
@@ -194,7 +194,7 @@ Review:
 
 Then run inside the development container:
 
-```sh
+```bash
 cd /workspace/terraform
 tf init
 tf fmt -recursive
@@ -227,7 +227,7 @@ The read-only Forge app adds an **Incident / RCA** context panel to Incident wor
 
 Inside the development container:
 
-```sh
+```bash
 cd /workspace/custom-apps/incident-rca-status
 npm ci
 forge lint

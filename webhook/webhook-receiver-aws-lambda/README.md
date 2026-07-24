@@ -110,7 +110,7 @@ lambda_function.lambda_handler
 
 Example packaging command from this directory:
 
-```sh
+```bash
 zip jira-webhook-lambda.zip \
   http_utils.py \
   idempotency.py \
@@ -139,7 +139,7 @@ Configure the following Lambda environment variables.
 
 The Jira Cloud ID can be obtained with the repository helper described in the root and Terraform documentation:
 
-```sh
+```bash
 node terraform/scripts/show-jira-identifiers.mjs
 ```
 
@@ -183,7 +183,7 @@ The URL must be publicly reachable because Jira Cloud sends the webhook from out
 
 After creating the Function URL, open it in a browser or call it with `curl`:
 
-```sh
+```bash
 curl https://your-function-url.lambda-url.region.on.aws/
 ```
 

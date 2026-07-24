@@ -1,7 +1,7 @@
 {
   "terraform-demo": {
     "key": "TFDEMO",
-    "name": "Terraform Demo",
+    "name": "Terraform Demo (team)",
     "management": "team",
     "project_type_key": "software",
     "project_template_key": "com.pyxis.greenhopper.jira:gh-simplified-agility-scrum",
@@ -10,7 +10,7 @@
   },
   "terraform-kanban": {
     "key": "TFKAN",
-    "name": "Terraform Kanban",
+    "name": "Terraform Kanban (team)",
     "management": "team",
     "project_type_key": "software",
     "project_template_key": "com.pyxis.greenhopper.jira:gh-simplified-agility-kanban",
@@ -19,7 +19,7 @@
   },
   "terraform-classic": {
     "key": "TFCLS",
-    "name": "Terraform Classic Scrum",
+    "name": "Terraform Classic Scrum (company)",
     "management": "company",
     "project_type_key": "software",
     "project_template_key": "com.pyxis.greenhopper.jira:gh-simplified-scrum-classic",

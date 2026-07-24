@@ -36,4 +36,4 @@ RUN apt-get update \
 
 WORKDIR /workspace
 
-CMD ["sh"]
+CMD ["bash"]

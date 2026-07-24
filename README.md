@@ -106,6 +106,8 @@ Fill in the variables needed by the experiment you selected. `FORGE_API_TOKEN` s
 
 The container entrypoint automatically reuses `ATLASSIAN_EMAIL` and `ATLASSIAN_API_TOKEN` as the Terraform inputs required by the generic Jira Forms provider, so those credentials are defined only once.
 
+The container also provides the `tf` alias for Terraform-compatible commands. It invokes the executable selected by `TF_CLI` in the env file. The default is `terraform`; after adding OpenTofu to the image, switch the alias by setting `TF_CLI=tofu`.
+
 ### Build and start the container
 
 Docker:
@@ -155,7 +157,7 @@ Inside the container:
 pwd
 node --version
 forge --version
-terraform version
+tf version
 forge whoami
 node terraform/scripts/show-jira-identifiers.mjs
 ```
@@ -194,19 +196,19 @@ Then run inside the development container:
 
 ```sh
 cd /workspace/terraform
-terraform init
-terraform fmt -recursive
-terraform validate
-terraform plan -out=tfplan
-terraform apply tfplan
-terraform output jira_spaces
-terraform output jira_configuration_profiles
-terraform output jira_profile_assignments
-terraform output jira_forms
-terraform plan
+tf init
+tf fmt -recursive
+tf validate
+tf plan -out=tfplan
+tf apply tfplan
+tf output jira_spaces
+tf output jira_configuration_profiles
+tf output jira_profile_assignments
+tf output jira_forms
+tf plan
 ```
 
-**Successful result:** `terraform apply` completes, the outputs contain the created spaces and scheme IDs, and the final plan reports no changes.
+**Successful result:** `tf apply` completes, the outputs contain the created spaces and scheme IDs, and the final plan reports no changes.
 
 See [`terraform/README.md`](terraform/README.md) for the configuration schema, reconciliation modes, provider limitation, and production caveats.
 

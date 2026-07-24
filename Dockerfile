@@ -37,7 +37,8 @@ RUN apt-get update \
 WORKDIR /workspace
 
 COPY container-entrypoint.sh /usr/local/bin/container-entrypoint
-RUN chmod +x /usr/local/bin/container-entrypoint
+COPY terraform-cli-alias.sh /usr/local/bin/tf
+RUN chmod +x /usr/local/bin/container-entrypoint /usr/local/bin/tf
 
 ENTRYPOINT ["container-entrypoint"]
 CMD ["bash"]

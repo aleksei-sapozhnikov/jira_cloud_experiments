@@ -11,6 +11,8 @@ This directory contains optional Command Prompt wrappers for building and starti
 
 Both scripts can be launched from any current directory. They resolve the repository root relative to their own location.
 
+The container exposes `tf` as a configurable alias for Terraform-compatible commands. `TF_CLI=terraform` is the default in the root env file; set it to `tofu` after installing OpenTofu in the image.
+
 ## Container runtime selection
 
 Each script searches `PATH` in this order:
@@ -49,6 +51,7 @@ After `container-run.cmd`:
 
 - the script prints which runtime it selected;
 - an interactive container shell opens in `/workspace`;
+- a framed startup hint shows which executable the `tf` alias uses;
 - the repository is available inside the container;
 - npm and Terraform provider caches use persistent named volumes;
 - the window remains open if startup fails.

@@ -204,13 +204,13 @@ The container entrypoint reuses these values as `TF_VAR_jira_forms_email` and `T
 
 ## Running Terraform
 
-Inside the development container:
+Inside the development container, use the `tf` alias. It runs the executable selected by `TF_CLI` in `jira-cloud-iac-dev.env` (`terraform` by default, or `tofu` when OpenTofu is installed in the image):
 
 ```sh
 cd /workspace/terraform
-terraform init
-terraform fmt -recursive
-terraform validate
+tf init
+tf fmt -recursive
+tf validate
 ```
 
 Expected result: initialization completes, formatting produces no unexpected changes, and validation reports that the configuration is valid.
@@ -218,28 +218,28 @@ Expected result: initialization completes, formatting produces no unexpected cha
 Review the plan and apply demonstration mode:
 
 ```sh
-terraform plan -out=tfplan
-terraform apply tfplan
+tf plan -out=tfplan
+tf apply tfplan
 ```
 
 Inspect the resulting Terraform outputs:
 
 ```sh
-terraform output jira_spaces
-terraform output jira_configuration_profiles
-terraform output jira_profile_assignments
-terraform output jira_forms
+tf output jira_spaces
+tf output jira_configuration_profiles
+tf output jira_profile_assignments
+tf output jira_forms
 ```
 
 Then confirm the stable result:
 
 ```sh
-terraform plan
+tf plan
 ```
 
 Expected result after the initial application:
 
-- `terraform apply` reports `Apply complete`;
+- `tf apply` reports `Apply complete`;
 - `jira_spaces` lists the configured Jira spaces;
 - `jira_configuration_profiles` lists the generated workflow, screen, and field-configuration IDs;
 - `jira_profile_assignments` shows the desired project-to-profile associations;
@@ -267,8 +267,8 @@ Use this when every plan should include a live Jira association check if applied
 
 ```sh
 TF_VAR_jira_profile_reconciliation_mode=always \
-  terraform plan -out=tfplan
-terraform apply tfplan
+  tf plan -out=tfplan
+tf apply tfplan
 ```
 
 Expected result: the reconciliation `terraform_data` resource is intentionally replaced, the script checks live Jira associations, and `PUT` requests are sent only for associations that differ.

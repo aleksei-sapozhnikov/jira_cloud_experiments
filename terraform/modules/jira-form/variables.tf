@@ -92,3 +92,21 @@ variable "form" {
     error_message = "Choice questions require choices; other question types must not define them."
   }
 }
+
+variable "publication" {
+  description = "Jira work type used when the form creates a work item"
+
+  type = object({
+    issue_type_id      = string
+    issue_type_name    = string
+    submit_on_create   = optional(bool, true)
+    validate_on_create = optional(bool, true)
+  })
+
+  nullable = false
+
+  validation {
+    condition     = length(trimspace(var.publication.issue_type_id)) > 0
+    error_message = "The publication work type was not found in the form's Jira space. Create it in the space or correct publish.issue_type in forms.json."
+  }
+}

@@ -1,6 +1,11 @@
 {
   "incident-report": {
     "space": "terraform-demo",
+    "publish": {
+      "issue_type": "Incident",
+      "submit_on_create": true,
+      "validate_on_create": true
+    },
     "form": {
       "name": "Terraform Incident Report",
       "language": "en",

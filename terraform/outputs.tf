@@ -90,6 +90,10 @@ output "jira_forms" {
       id          = form.id
       name        = form.name
       project_key = form.project_key
+      issue_type = {
+        id   = form.issue_type_id
+        name = form.issue_type_name
+      }
     }
   }
 }

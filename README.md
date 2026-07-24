@@ -183,6 +183,8 @@ Terraform creates three demonstration spaces, generates a reusable configuration
 - `always` reconciliation in every plan for live association checks when that plan is applied.
 - native create/read/update/delete lifecycle for the form template.
 
+Before the first Forms apply, create the standard-level `Incident` work type in **TFDEMO → Space settings → Work types**. Jira does not expose public creation of project-scoped work types for team-managed spaces. Terraform resolves the resulting site-specific ID by name and publishes the form for Incident creation.
+
 ### Reproduce
 
 Review:

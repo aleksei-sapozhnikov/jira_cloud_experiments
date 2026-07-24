@@ -85,6 +85,29 @@ locals {
   }
 }
 
+data "atlassian_jira_issue_types" "form_project" {
+  for_each = local.forms
+
+  project_id = module.jira_space[each.value.space].id
+}
+
+locals {
+  form_issue_type_matches = {
+    for form_key, form in local.forms :
+    form_key => [
+      for issue_type
+      in data.atlassian_jira_issue_types.form_project[form_key].issue_types :
+      issue_type
+      if lower(issue_type.name) == lower(form.publish.issue_type)
+    ]
+  }
+
+  form_issue_type_ids = {
+    for form_key, issue_types in local.form_issue_type_matches :
+    form_key => length(issue_types) == 1 ? issue_types[0].id : ""
+  }
+}
+
 module "jira_form" {
   source = "./modules/jira-form"
 
@@ -92,6 +115,15 @@ module "jira_form" {
 
   project_key = module.jira_space[each.value.space].key
   form        = each.value.form
+  publication = {
+    issue_type_id    = local.form_issue_type_ids[each.key]
+    issue_type_name  = each.value.publish.issue_type
+    submit_on_create = try(each.value.publish.submit_on_create, true)
+    validate_on_create = try(
+      each.value.publish.validate_on_create,
+      true
+    )
+  }
 }
 
 module "jira_space" {

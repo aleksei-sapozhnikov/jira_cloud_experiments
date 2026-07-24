@@ -74,6 +74,15 @@ locals {
         }
       }
     }
+    publish = {
+      jira = {
+        issueCreateIssueTypeIds = [
+          var.publication.issue_type_id
+        ]
+        submitOnCreate   = var.publication.submit_on_create
+        validateOnCreate = var.publication.validate_on_create
+      }
+    }
   }
 }
 

@@ -104,9 +104,13 @@ Jira statuses are global. The supplied workflow uses distinct Terraform-prefixed
 
 ### `config/forms.json`
 
-Defines form templates independently from the native Forms API payload. Each top-level key is a stable Terraform identity. `space` references a key from `spaces.json`, and `form.questions` uses stable numeric IDs and readable question keys.
+Defines form templates independently from the native Forms API payload. Each top-level key is a stable Terraform identity. `space` references a key from `spaces.json`, `publish.issue_type` names the work type created when the form is submitted, and `form.questions` uses stable numeric IDs and readable question keys.
 
 The demonstration supports `short_text`, `long_text`, `paragraph`, `radio`, `checkboxes`, `dropdown`, `date`, `number`, `email`, and `url`. Choice questions require a non-empty `choices` array.
+
+The work type is selected by its readable name in JSON rather than by a site-specific numeric ID. The root configuration reads the work types belonging to the target space, resolves exactly one matching ID, and passes that ID directly to the form module. The ID is also included in `jira_forms` output for inspection; outputs are not used as inputs inside the same Terraform configuration.
+
+Before the first Forms apply, create the standard-level `Incident` work type in **TFDEMO → Space settings → Work types**. Jira's public issue-type API can read project-scoped work types but cannot create one inside a team-managed space. Terraform reports a targeted validation error if the configured name is absent or ambiguous.
 
 ## Jira Forms module
 
@@ -115,9 +119,11 @@ The demonstration supports `short_text`, `long_text`, `paragraph`, `radio`, `che
 - readable question types become Jira's compact type codes such as `ts`, `cs`, and `rt`;
 - numeric question IDs connect the question map to ADF layout extension nodes;
 - deterministic UUIDv5 values keep ADF node identities stable between plans;
+- the configured work type name is resolved to its project-specific ID;
+- the form is published for that work type through `publish.jira.issueCreateIssueTypeIds`;
 - the generic REST resource owns the returned form ID and performs POST, GET, PUT, and DELETE.
 
-The module intentionally covers a small, useful set of fields. Advanced layout, sections, conditional logic, Jira-field links, and portal publishing are outside this demonstration rather than being hidden behind an untested universal abstraction.
+The module intentionally covers a small, useful set of fields. Advanced layout, sections, conditional logic, Jira-field links, request-type publishing, and portal publishing are outside this demonstration rather than being hidden behind an untested universal abstraction.
 
 ## Profile assignment module
 
@@ -320,9 +326,10 @@ For the interview demonstration:
 - Jira Free does not allow creation of custom permission schemes. The supplied profile therefore disables permission-scheme creation.
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
+- Jira's public API does not create project-scoped work types inside team-managed spaces. Create the configured work type once in the space UI; Terraform then resolves its ID by name and manages the form publication.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
 - The container entrypoint maps Jira credentials to Terraform variables for the generic REST provider; Terraform runs outside the development image must provide those two `TF_VAR_*` variables explicitly.
-- The form is created as an unattached project template. Publishing it to request types requires site-specific IDs and is intentionally omitted.
+- The form is published for Jira work-item creation. Publishing to Jira Service Management request types or a customer portal is intentionally omitted.
 
 ## State and production usage
 

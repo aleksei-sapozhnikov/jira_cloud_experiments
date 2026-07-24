@@ -36,4 +36,8 @@ RUN apt-get update \
 
 WORKDIR /workspace
 
+COPY container-entrypoint.sh /usr/local/bin/container-entrypoint
+RUN chmod +x /usr/local/bin/container-entrypoint
+
+ENTRYPOINT ["container-entrypoint"]
 CMD ["bash"]

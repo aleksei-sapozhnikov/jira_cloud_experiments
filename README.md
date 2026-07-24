@@ -104,6 +104,8 @@ copy jira-cloud-iac-dev.env.example jira-cloud-iac-dev.env
 
 Fill in the variables needed by the experiment you selected. `FORGE_API_TOKEN` should contain an Atlassian API scoped token created for Forge. Never commit `jira-cloud-iac-dev.env`; it is excluded by `.gitignore`.
 
+The container entrypoint automatically reuses `ATLASSIAN_EMAIL` and `ATLASSIAN_API_TOKEN` as the Terraform inputs required by the generic Jira Forms provider, so those credentials are defined only once.
+
 ### Build and start the container
 
 Docker:

@@ -163,7 +163,7 @@ TF_VAR_jira_forms_api_token
 
 Terraform automatically maps environment variables named `TF_VAR_<variable_name>` to root module input variables.
 
-The generic REST provider does not read the `ATLASSIAN_*` variables used by the Jira provider. Copy the same email and API token into the corresponding `TF_VAR_jira_forms_*` entries in `jira-cloud-iac-dev.env`. Do not commit the local environment file.
+The generic REST provider does not read the `ATLASSIAN_*` variables used by the Jira provider. The development container entrypoint automatically maps them to the corresponding `TF_VAR_jira_forms_*` variables, so the email and token are defined only once in `jira-cloud-iac-dev.env`.
 
 ## Finding Jira identifiers
 
@@ -187,23 +187,20 @@ TF_VAR_jira_cloud_id=returned-cloud-id
 
 Restart the container after editing the env file.
 
-Expected result: the script prints the current Jira user, account ID, Cloud ID, and ready-to-copy Terraform environment-variable lines. It deliberately prints a placeholder for the Forms API token rather than exposing the existing secret.
+Expected result: the script prints the current Jira user, account ID, Cloud ID, and ready-to-copy non-secret Terraform environment-variable lines.
 
 ## Authentication setup for Jira Forms
 
 This local Terraform demonstration uses the authentication method Atlassian documents for personal scripts, bots, and ad-hoc Forms API calls: an Atlassian account email with an API token.
 
-Copy the existing Jira credentials in the local environment file:
+Configure the Jira credentials once in the local environment file:
 
 ```dotenv
 ATLASSIAN_EMAIL=you@example.com
 ATLASSIAN_API_TOKEN=your-api-token
-
-TF_VAR_jira_forms_email=you@example.com
-TF_VAR_jira_forms_api_token=your-api-token
 ```
 
-Restart the development container after editing the file because Docker reads `--env-file` only at container creation. The API token must belong to a user with the Administer Jira project permission for the target project.
+The container entrypoint reuses these values as `TF_VAR_jira_forms_email` and `TF_VAR_jira_forms_api_token`. Explicit `TF_VAR_*` values still take precedence when supplied. Rebuild and restart the development container after this repository change; Docker reads `--env-file` only at container creation. The API token must belong to a user with the Administer Jira project permission for the target project.
 
 ## Running Terraform
 
@@ -324,7 +321,7 @@ For the interview demonstration:
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
-- Jira Forms credentials are supplied twice under different environment-variable names because the two Terraform providers use different configuration mechanisms.
+- The container entrypoint maps Jira credentials to Terraform variables for the generic REST provider; Terraform runs outside the development image must provide those two `TF_VAR_*` variables explicitly.
 - The form is created as an unattached project template. Publishing it to request types requires site-specific IDs and is intentionally omitted.
 
 ## State and production usage

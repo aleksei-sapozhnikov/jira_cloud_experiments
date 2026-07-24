@@ -68,8 +68,4 @@ if (currentUser?.accountId || tenant?.cloudId) {
     console.log(`TF_VAR_jira_cloud_id=${tenant.cloudId}`);
   }
 
-  console.log(`TF_VAR_jira_forms_email=${process.env.ATLASSIAN_EMAIL}`);
-  console.log(
-    'TF_VAR_jira_forms_api_token=copy-ATLASSIAN_API_TOKEN-value',
-  );
 }

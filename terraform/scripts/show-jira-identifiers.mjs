@@ -1,9 +1,8 @@
 /**
  * Displays Jira identifiers derived from the configured site and credentials.
  *
- * The current Terraform configuration needs the authenticated user's account ID
- * for the project-lead input. The Cloud ID is printed for diagnostics only and
- * is not required by this repository's Terraform or Forge commands.
+ * Terraform uses the authenticated user's account ID for project leads and the
+ * Cloud ID to address the Jira Forms OAuth API.
  */
 
 const requiredVariables = [
@@ -55,10 +54,17 @@ console.log(`Cloud ID: ${tenant?.cloudId ?? 'not returned'}`);
 console.log(`User: ${currentUser?.displayName ?? 'unknown'}`);
 console.log(`Account ID: ${currentUser?.accountId ?? 'not returned'}`);
 
-if (currentUser?.accountId) {
+if (currentUser?.accountId || tenant?.cloudId) {
   console.log('');
-  console.log('Add this line to jira-cloud-iac-dev.env:');
-  console.log(
-    `TF_VAR_jira_project_lead_account_id=${currentUser.accountId}`,
-  );
+  console.log('Add these lines to jira-cloud-iac-dev.env:');
+
+  if (currentUser?.accountId) {
+    console.log(
+      `TF_VAR_jira_project_lead_account_id=${currentUser.accountId}`,
+    );
+  }
+
+  if (tenant?.cloudId) {
+    console.log(`TF_VAR_jira_cloud_id=${tenant.cloudId}`);
+  }
 }

@@ -2,7 +2,7 @@
 
 [← Back to the portfolio overview](../README.md#terraform-jira-configuration-as-code)
 
-This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, then associates the generated schemes with company-managed spaces.
+This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, and manages a Jira Form through the official Forms REST API.
 
 ## Result in brief
 
@@ -12,6 +12,7 @@ After one apply, the demonstration contains:
 - one company-managed space;
 - a reusable workflow, screen, and field-configuration profile;
 - project-to-scheme associations reconciled through an idempotent REST helper;
+- an incident-report form with text, radio, checkbox, date, and paragraph questions;
 - Terraform outputs with the created space and scheme identifiers.
 
 A second plan with `config/demo.tfvars` reports:
@@ -28,11 +29,14 @@ This is the shortest successful check for the portfolio demonstration. The `alwa
 - [What is managed](#what-is-managed)
 - [Directory structure](#directory-structure)
 - [Configuration files](#configuration-files)
+- [Jira Forms module](#jira-forms-module)
 - [Authentication and inputs](#authentication-and-inputs)
+- [OAuth setup for Jira Forms](#oauth-setup-for-jira-forms)
 - [Finding Jira identifiers](#finding-jira-identifiers)
 - [Running Terraform](#running-terraform)
 - [Reconciliation modes](#reconciliation-modes)
 - [Why a REST script is used](#why-a-rest-script-is-used)
+- [Why a generic REST provider is used for Forms](#why-a-generic-rest-provider-is-used-for-forms)
 - [Important limitations](#important-limitations)
 - [State and production usage](#state-and-production-usage)
 - [Related documentation](#related-documentation)
@@ -49,6 +53,7 @@ The current configuration demonstrates:
 - field configurations and field-configuration schemes;
 - optional permission schemes where the Jira plan supports them;
 - project-to-scheme associations for company-managed spaces.
+- Jira form templates with a normal Terraform CRUD lifecycle.
 
 ## Directory structure
 
@@ -57,11 +62,13 @@ terraform/
 ├── config/
 │   ├── spaces.json
 │   ├── configuration-profiles.json
+│   ├── forms.json
 │   ├── demo.tfvars
 │   └── reconcile.tfvars
 ├── modules/
 │   ├── jira-space/
-│   └── jira-configuration-profile/
+│   ├── jira-configuration-profile/
+│   └── jira-form/
 ├── scripts/
 │   ├── assign-jira-profile.mjs
 │   └── show-jira-identifiers.mjs
@@ -93,6 +100,23 @@ Defines reusable Jira configuration objects such as:
 - optional permission grants.
 
 Jira statuses are global. The supplied workflow uses distinct Terraform-prefixed status names so that Jira does not reject duplicate global status creation.
+
+### `config/forms.json`
+
+Defines form templates independently from the native Forms API payload. Each top-level key is a stable Terraform identity. `space` references a key from `spaces.json`, and `form.questions` uses stable numeric IDs and readable question keys.
+
+The demonstration supports `short_text`, `long_text`, `paragraph`, `radio`, `checkboxes`, `dropdown`, `date`, `number`, `email`, and `url`. Choice questions require a non-empty `choices` array.
+
+## Jira Forms module
+
+`modules/jira-form` translates the concise JSON definition into the native Jira Forms structure:
+
+- readable question types become Jira's compact type codes such as `ts`, `cs`, and `rt`;
+- numeric question IDs connect the question map to ADF layout extension nodes;
+- deterministic UUIDv5 values keep ADF node identities stable between plans;
+- the generic REST resource owns the returned form ID and performs POST, GET, PUT, and DELETE.
+
+The module intentionally covers a small, useful set of fields. Advanced layout, sections, conditional logic, Jira-field links, and portal publishing are outside this demonstration rather than being hidden behind an untested universal abstraction.
 
 ### Reconciliation variable files
 
@@ -128,6 +152,13 @@ The project lead is a required Terraform variable:
 TF_VAR_jira_project_lead_account_id
 ```
 
+The Forms API additionally uses:
+
+```text
+TF_VAR_jira_cloud_id
+TF_VAR_jira_forms_oauth_access_token
+```
+
 Terraform automatically maps environment variables named `TF_VAR_<variable_name>` to root module input variables.
 
 When using the root development container, define these values in `jira-cloud-iac-dev.env`, copied from `jira-cloud-iac-dev.env.example`.
@@ -145,17 +176,33 @@ The helper calls:
 - `GET /rest/api/3/myself` to obtain the authenticated user's `accountId`;
 - `GET /_edge/tenant_info` to display the site's Cloud ID.
 
-Add the printed line to the environment file:
+Add the printed lines to the environment file:
 
 ```dotenv
 TF_VAR_jira_project_lead_account_id=returned-account-id
+TF_VAR_jira_cloud_id=returned-cloud-id
 ```
 
 Restart the container after editing the env file.
 
-Expected result: the script prints the current Jira user, account ID, Cloud ID, and a ready-to-copy Terraform environment-variable line.
+Expected result: the script prints the current Jira user, account ID, Cloud ID, and ready-to-copy Terraform environment-variable lines.
 
-The Cloud ID is informational in this repository. The current Terraform provider and REST reconciliation script call the Jira site through `ATLASSIAN_URL`, so no Cloud ID is stored in configuration.
+## OAuth setup for Jira Forms
+
+Atlassian requires OAuth 2.0 authorization-code grants (3LO) for external integrations; it does not offer a client-credentials grant for this API. Create an OAuth 2.0 integration in the Atlassian developer console and grant:
+
+```text
+read:jira-work
+manage:jira-project
+```
+
+Complete the interactive consent and authorization-code exchange, then place the returned access token in the local environment file:
+
+```dotenv
+TF_VAR_jira_forms_oauth_access_token=returned-access-token
+```
+
+The access token is short-lived. Refresh it before a later Terraform run. A production integration should obtain and rotate tokens outside Terraform through a secret manager or CI identity step; access and refresh tokens must not be committed or stored in JSON configuration.
 
 ## Running Terraform
 
@@ -183,6 +230,7 @@ Inspect the resulting Terraform outputs:
 terraform output jira_spaces
 terraform output jira_configuration_profiles
 terraform output jira_profile_assignments
+terraform output jira_forms
 ```
 
 Then confirm the stable result:
@@ -197,6 +245,7 @@ Expected result after the initial application:
 - `jira_spaces` lists the configured Jira spaces;
 - `jira_configuration_profiles` lists the generated workflow, screen, and field-configuration IDs;
 - `jira_profile_assignments` shows the desired project-to-profile associations;
+- `jira_forms` shows the form template ID and owning project;
 - the subsequent plan reports:
 
 ```text
@@ -253,6 +302,19 @@ The three reconciled relationships are:
 - project → issue-type screen scheme;
 - project → field-configuration scheme.
 
+## Why a generic REST provider is used for Forms
+
+The selected Jira provider does not expose Jira Forms resources, while Atlassian provides supported create, read, update, and delete endpoints. `Mastercard/restapi` maps those endpoints to a real Terraform resource and retains the server-generated form ID in state.
+
+This is materially different from the association helper above. A create script invoked with `local-exec` cannot return a new form ID into Terraform state, making refresh, drift detection, and destroy unreliable. The generic provider preserves the resource lifecycle without the scope of writing a custom Terraform provider.
+
+For the interview demonstration:
+
+1. apply and show the form in Jira;
+2. run a second plan and show `No changes`;
+3. edit a label in `config/forms.json` and show an in-place update;
+4. destroy only the module instance and show that the template is removed.
+
 ## Important limitations
 
 - The workflow-scheme association endpoint used by this example requires an empty company-managed project. Existing work items may require a migration-aware workflow switch.
@@ -260,6 +322,8 @@ The three reconciled relationships are:
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
+- Forms OAuth uses a short-lived 3LO access token; token renewal is intentionally outside this Terraform module.
+- The form is created as an unattached project template. Publishing it to request types requires site-specific IDs and is intentionally omitted.
 
 ## State and production usage
 

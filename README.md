@@ -8,7 +8,7 @@ The examples share one Incident/RCA scenario, but they do not have to be deploye
 
 | Experiment | Result | What it demonstrates | Reproduction guide |
 | --- | --- | --- | --- |
-| [Jira configuration with Terraform](#terraform-jira-configuration-as-code) | Creates team-managed and company-managed spaces, reusable workflows, screens, and field configurations. A second demonstration plan is clean. | Terraform modules, JSON-driven configuration, stable resource identities, and idempotent REST reconciliation. | [`terraform/README.md`](terraform/README.md) |
+| [Jira configuration with Terraform](#terraform-jira-configuration-as-code) | Creates spaces, reusable schemes, and a multi-field Jira Form. A second demonstration plan is clean. | Terraform modules, JSON-driven configuration, REST resource lifecycle, stable identities, and idempotent reconciliation. | [`terraform/README.md`](terraform/README.md) |
 | [Incident / RCA Forge app](#forge-incident--rca-status) | Adds an Incident context panel with **RCA missing**, **RCA incomplete**, or **RCA completed** status. | Forge UI Kit, `issueContext`, Jira REST access, dynamic properties, and minimal scopes. | [`custom-apps/incident-rca-status/README.md`](custom-apps/incident-rca-status/README.md) |
 | [Signed Jira webhook on AWS](#aws-lambda-signed-jira-webhook) | Turns a newly created `URGENT` Bug into a linked Incident and ignores duplicate deliveries. | HMAC validation, Atlassian OAuth, Lambda Function URLs, DynamoDB idempotency, and Jira REST writes. | [`webhook/webhook-receiver-aws-lambda/README.md`](webhook/webhook-receiver-aws-lambda/README.md) |
 | [ScriptRunner Cloud examples](#scriptrunner-cloud-examples) | Creates Incidents for urgent Stories, reconciles an `rca-missing` label, and protects Incident closing transitions. | Listeners, Scheduled Jobs, Script Manager code, Jira expressions, restrictions, and validators. | [`scriptrunner/README.md`](scriptrunner/README.md) |
@@ -70,7 +70,7 @@ The experiments have different prerequisites and can be evaluated independently:
 
 | Experiment | Jira access | Additional prerequisites | Deployment model |
 | --- | --- | --- | --- |
-| Terraform | Jira administrator and API token | Docker or Podman | Automated by Terraform, with a REST-backed association step |
+| Terraform | Jira administrator, API token, and OAuth 2.0 (3LO) grant for Forms | Docker or Podman | Automated by Terraform, including a REST-backed Forms resource |
 | Forge app | Permission to deploy and install Forge apps | Docker or Podman; Forge credentials | Forge CLI |
 | AWS webhook | Permission to create and link work items | AWS account; Atlassian OAuth client | Source is included; AWS resources are configured manually |
 | ScriptRunner | ScriptRunner for Jira Cloud | Permission to edit the selected workflows | Source is included; configuration is copied into the Jira and ScriptRunner editors |
@@ -158,10 +158,11 @@ forge whoami
 node terraform/scripts/show-jira-identifiers.mjs
 ```
 
-The identifier helper prints the authenticated user, Jira account ID, Cloud ID, and a ready-to-copy Terraform variable:
+The identifier helper prints the authenticated user, Jira account ID, Cloud ID, and ready-to-copy Terraform variables:
 
 ```text
 TF_VAR_jira_project_lead_account_id=712020:example-account-id
+TF_VAR_jira_cloud_id=33398233-27d5-48f6-9dea-d0ea33d97528
 ```
 
 Add that line to `jira-cloud-iac-dev.env` and restart the container before running Terraform.
@@ -172,10 +173,11 @@ Add that line to `jira-cloud-iac-dev.env` and restart the container before runni
 
 ### Result
 
-Terraform creates three demonstration spaces, generates a reusable configuration profile, and associates its workflow, screen, and field-configuration schemes with the company-managed space. The repository supports:
+Terraform creates three demonstration spaces, generates a reusable configuration profile, associates its schemes with the company-managed space, and creates a Jira Form through the official Forms REST API. The repository supports:
 
 - `on_change` reconciliation for a clean second plan;
 - `always` reconciliation for a live association check on every apply.
+- native create/read/update/delete lifecycle for the form template.
 
 ### Reproduce
 
@@ -183,6 +185,7 @@ Review:
 
 - `terraform/config/spaces.json`;
 - `terraform/config/configuration-profiles.json`;
+- `terraform/config/forms.json`;
 - `TF_VAR_jira_project_lead_account_id` in the local environment file.
 
 Then run inside the development container:
@@ -197,6 +200,7 @@ terraform apply tfplan
 terraform output jira_spaces
 terraform output jira_configuration_profiles
 terraform output jira_profile_assignments
+terraform output jira_forms
 terraform plan -var-file=config/demo.tfvars
 ```
 

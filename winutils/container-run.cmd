@@ -28,6 +28,10 @@ echo Starting jira-cloud-iac-dev with %CONTAINER_RUNTIME%...
 
 set "EXIT_CODE=%ERRORLEVEL%"
 if not "%EXIT_CODE%"=="0" goto :error_with_code
+
+echo.
+echo All done. Press any key to exit.
+pause >nul
 exit /b 0
 
 :find_container_runtime

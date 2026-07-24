@@ -2,7 +2,7 @@
   "incident-report": {
     "space": "terraform-demo",
     "form": {
-      "name": "Incident report",
+      "name": "Terraform Incident Report",
       "language": "en",
       "primary_locale": "en-US",
       "submit": {

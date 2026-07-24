@@ -12,7 +12,7 @@ After one apply, the demonstration contains:
 - one company-managed space;
 - a reusable workflow, screen, and field-configuration profile;
 - project-to-scheme associations reconciled through an idempotent REST helper;
-- an incident-report form with text, radio, checkbox, date, and paragraph questions;
+- a `Terraform Incident Report` form with text, radio, checkbox, date, and paragraph questions;
 - Terraform outputs with the created space and scheme identifiers.
 
 A second plan in the default `on_terraform_change` mode reports:

@@ -195,13 +195,13 @@ cd /workspace/terraform
 terraform init
 terraform fmt -recursive
 terraform validate
-terraform plan -var-file=config/demo.tfvars -out=tfplan
+terraform plan -out=tfplan
 terraform apply tfplan
 terraform output jira_spaces
 terraform output jira_configuration_profiles
 terraform output jira_profile_assignments
 terraform output jira_forms
-terraform plan -var-file=config/demo.tfvars
+terraform plan
 ```
 
 **Successful result:** `terraform apply` completes, the outputs contain the created spaces and scheme IDs, and the final plan reports no changes.

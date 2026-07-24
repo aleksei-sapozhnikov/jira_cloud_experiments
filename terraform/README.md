@@ -15,7 +15,7 @@ After one apply, the demonstration contains:
 - an incident-report form with text, radio, checkbox, date, and paragraph questions;
 - Terraform outputs with the created space and scheme identifiers.
 
-A second plan with `config/demo.tfvars` reports:
+A second plan in the default `on_change` mode reports:
 
 ```text
 No changes. Your infrastructure matches the configuration.
@@ -30,6 +30,7 @@ This is the shortest successful check for the portfolio demonstration. The `alwa
 - [Directory structure](#directory-structure)
 - [Configuration files](#configuration-files)
 - [Jira Forms module](#jira-forms-module)
+- [Profile assignment module](#profile-assignment-module)
 - [Authentication and inputs](#authentication-and-inputs)
 - [OAuth setup for Jira Forms](#oauth-setup-for-jira-forms)
 - [Finding Jira identifiers](#finding-jira-identifiers)
@@ -52,7 +53,7 @@ The current configuration demonstrates:
 - screen schemes and issue-type screen schemes;
 - field configurations and field-configuration schemes;
 - optional permission schemes where the Jira plan supports them;
-- project-to-scheme associations for company-managed spaces.
+- project-to-scheme associations for company-managed spaces;
 - Jira form templates with a normal Terraform CRUD lifecycle.
 
 ## Directory structure
@@ -62,15 +63,15 @@ terraform/
 ├── config/
 │   ├── spaces.json
 │   ├── configuration-profiles.json
-│   ├── forms.json
-│   ├── demo.tfvars
-│   └── reconcile.tfvars
+│   └── forms.json
 ├── modules/
 │   ├── jira-space/
 │   ├── jira-configuration-profile/
-│   └── jira-form/
+│   ├── jira-form/
+│   └── jira-profile-assignment/
+│       └── scripts/
+│           └── assign-jira-profile.mjs
 ├── scripts/
-│   ├── assign-jira-profile.mjs
 │   └── show-jira-identifiers.mjs
 ├── main.tf
 ├── outputs.tf
@@ -118,23 +119,17 @@ The demonstration supports `short_text`, `long_text`, `paragraph`, `radio`, `che
 
 The module intentionally covers a small, useful set of fields. Advanced layout, sections, conditional logic, Jira-field links, and portal publishing are outside this demonstration rather than being hidden behind an untested universal abstraction.
 
-### Reconciliation variable files
+## Profile assignment module
 
-`config/demo.tfvars`:
+`modules/jira-profile-assignment` exposes a domain-level interface: a project, the three desired scheme IDs, and a reconciliation mode. The module owns the `terraform_data` resource, change triggers, environment mapping, and idempotent REST helper.
 
-```hcl
-jira_profile_reconciliation_mode = "on_change"
-```
-
-The REST reconciliation script runs only when desired IDs or the script itself change. After an initial apply, a subsequent plan can show `No changes`.
-
-`config/reconcile.tfvars`:
+The root configuration passes the same explicit setting to every current module instance:
 
 ```hcl
-jira_profile_reconciliation_mode = "always"
+reconciliation_mode = var.jira_profile_reconciliation_mode
 ```
 
-Every apply runs the idempotent association check and repairs manual drift.
+The root variable defaults to `on_change`. Override it for a run through `TF_VAR_jira_profile_reconciliation_mode`, the `-var` CLI option, or a literal in the module call. No `.tfvars` file is required.
 
 ## Authentication and inputs
 
@@ -150,6 +145,12 @@ The project lead is a required Terraform variable:
 
 ```text
 TF_VAR_jira_project_lead_account_id
+```
+
+The optional profile-assignment mode defaults to `on_change`:
+
+```text
+TF_VAR_jira_profile_reconciliation_mode
 ```
 
 The Forms API additionally uses:
@@ -220,7 +221,7 @@ Expected result: initialization completes, formatting produces no unexpected cha
 Review the plan and apply demonstration mode:
 
 ```sh
-terraform plan -var-file=config/demo.tfvars -out=tfplan
+terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
@@ -236,7 +237,7 @@ terraform output jira_forms
 Then confirm the stable result:
 
 ```sh
-terraform plan -var-file=config/demo.tfvars
+terraform plan
 ```
 
 Expected result after the initial application:
@@ -268,7 +269,8 @@ Use this for a clean demonstration. Terraform executes the association script wh
 Use this when every apply should inspect live Jira associations:
 
 ```sh
-terraform plan -var-file=config/reconcile.tfvars -out=tfplan
+TF_VAR_jira_profile_reconciliation_mode=always \
+  terraform plan -out=tfplan
 terraform apply tfplan
 ```
 
@@ -276,19 +278,19 @@ Expected result: the reconciliation `terraform_data` resource is intentionally r
 
 In this mode Terraform intentionally replaces the `terraform_data` reconciliation resource on every apply. It does not replace the Jira space or the schemes.
 
-When switching from `always` back to `on_change`, apply `demo.tfvars` once. The next plan can then be clean.
+When switching from `always` back to `on_change`, set the environment variable back to `on_change` and apply once. The next plan can then be clean.
 
 ## Why a REST script is used
 
 The `gothub97/atlassian` provider creates the Jira objects used by this example. The provider version used here does not expose Terraform resources for all required project-to-scheme associations.
 
-Terraform therefore invokes:
+The root configuration delegates those associations to `modules/jira-profile-assignment`. Internally, the module invokes:
 
 ```text
-scripts/assign-jira-profile.mjs
+modules/jira-profile-assignment/scripts/assign-jira-profile.mjs
 ```
 
-through a `terraform_data` resource and `local-exec`.
+through a private `terraform_data` resource and `local-exec`. Callers only provide the project, desired scheme IDs, profile key, and reconciliation mode.
 
 This REST-backed step is still visible in the Terraform dependency graph and state inputs. The script is idempotent:
 

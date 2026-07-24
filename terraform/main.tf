@@ -149,59 +149,26 @@ locals {
   }
 }
 
-resource "terraform_data" "jira_configuration_profile_assignment" {
+module "jira_profile_assignment" {
+  source = "./modules/jira-profile-assignment"
+
   for_each = local.jira_profile_assignments
 
-  /*
-   * Keep the desired association and execution mode visible in Terraform
-   * state and outputs. The script path documents the REST-backed part of
-   * the configuration explicitly.
-   */
-  input = merge(each.value, {
-    reconciliation_mode   = var.jira_profile_reconciliation_mode
-    reconciliation_script = "scripts/assign-jira-profile.mjs"
-  })
+  project = {
+    id  = each.value.project_id
+    key = each.value.project_key
+  }
 
-  /*
-   * on_change:
-   *   Run only when the desired project/scheme IDs or the script change.
-   *   Subsequent plans can show "No changes".
-   *
-   * always:
-   *   plantimestamp() changes for every new plan, so apply replaces this
-   *   terraform_data resource and runs the idempotent reconciliation script.
-   */
-  triggers_replace = {
-    desired_configuration = each.value
-    reconciliation_run = (
-      var.jira_profile_reconciliation_mode == "always"
-      ? plantimestamp()
-      : "on-change-only"
+  schemes = {
+    workflow_id = each.value.workflow_scheme_id
+    issue_type_screen_id = (
+      each.value.issue_type_screen_scheme_id
     )
-    script_sha256 = filesha256(
-      "${path.module}/scripts/assign-jira-profile.mjs"
+    field_configuration_id = (
+      each.value.field_configuration_scheme_id
     )
   }
 
-  provisioner "local-exec" {
-    working_dir = path.module
-    command     = "node scripts/assign-jira-profile.mjs"
-
-    environment = {
-      JIRA_PROJECT_ID  = each.value.project_id
-      JIRA_PROJECT_KEY = each.value.project_key
-
-      JIRA_WORKFLOW_SCHEME_ID = (
-        each.value.workflow_scheme_id
-      )
-
-      JIRA_ISSUE_TYPE_SCREEN_SCHEME_ID = (
-        each.value.issue_type_screen_scheme_id
-      )
-
-      JIRA_FIELD_CONFIGURATION_SCHEME_ID = (
-        each.value.field_configuration_scheme_id
-      )
-    }
-  }
+  profile_key         = each.value.configuration_profile
+  reconciliation_mode = var.jira_profile_reconciliation_mode
 }

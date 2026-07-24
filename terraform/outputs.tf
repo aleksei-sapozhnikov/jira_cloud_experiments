@@ -70,9 +70,9 @@ output "jira_profile_assignments" {
 
   value = {
     for space_name, assignment
-    in terraform_data.jira_configuration_profile_assignment :
+    in module.jira_profile_assignment :
 
-    space_name => assignment.output
+    space_name => assignment.assignment
   }
 }
 

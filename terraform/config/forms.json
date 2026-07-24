@@ -1,6 +1,6 @@
 {
-  "incident-report": {
-    "space": "terraform-demo",
+  "jsm-incident-report": {
+    "space": "terraform-jsm",
     "publish": {
       "issue_type": "Incident",
       "submit_on_create": true,

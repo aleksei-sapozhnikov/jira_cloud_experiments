@@ -1,11 +1,11 @@
 {
-  "terraform-demo": {
-    "key": "TFDEMO",
-    "name": "Terraform Demo (team)",
+  "terraform-jsm": {
+    "key": "TFJSM",
+    "name": "Terraform Service Management (team)",
     "management": "team",
-    "project_type_key": "software",
-    "project_template_key": "com.pyxis.greenhopper.jira:gh-simplified-agility-scrum",
-    "description": "Team-managed Scrum space created by Terraform.",
+    "project_type_key": "service_desk",
+    "project_template_key": "com.atlassian.servicedesk:next-gen-it-service-desk",
+    "description": "Team-managed IT service management space created by Terraform.",
     "assignee_type": "PROJECT_LEAD"
   },
   "terraform-kanban": {

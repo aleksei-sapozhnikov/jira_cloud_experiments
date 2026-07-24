@@ -88,6 +88,10 @@ locals {
   }
 }
 
+resource "terraform_data" "form_owner" {
+  input = var.project_key
+}
+
 resource "restapi_object" "form" {
   path         = "/project/${var.project_key}/form"
   id_attribute = "id"
@@ -96,6 +100,10 @@ resource "restapi_object" "form" {
   ignore_server_additions = true
 
   lifecycle {
+    replace_triggered_by = [
+      terraform_data.form_owner
+    ]
+
     precondition {
       condition = (
         length(trimspace(var.publication.issue_type_id)) > 0

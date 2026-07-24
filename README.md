@@ -177,13 +177,13 @@ Add that line to `jira-cloud-iac-dev.env` and restart the container before runni
 
 ### Result
 
-Terraform creates three demonstration spaces, generates a reusable configuration profile, associates its schemes with the company-managed space, and creates a Jira Form through the official Forms REST API. The repository supports:
+Terraform creates three demonstration spaces, including a team-managed Jira Service Management space, generates a reusable configuration profile, associates its schemes with the company-managed space, and creates a Jira Form through the official Forms REST API. The repository supports:
 
 - `on_terraform_change` reconciliation for a clean second plan;
 - `always` reconciliation in every plan for live association checks when that plan is applied.
 - native create/read/update/delete lifecycle for the form template.
 
-Before the first Forms apply, create the standard-level `Incident` work type in **TFDEMO → Space settings → Work types**. Jira does not expose public creation of project-scoped work types for team-managed spaces. Terraform resolves the resulting site-specific ID by name and publishes the form for Incident creation.
+The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Incident` work type expected by the form. Terraform resolves its site-specific ID by name and publishes the form for Incident creation.
 
 ### Reproduce
 

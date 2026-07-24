@@ -80,3 +80,16 @@ output "jira_profile_reconciliation_mode" {
   description = "Current Jira profile association reconciliation mode"
   value       = var.jira_profile_reconciliation_mode
 }
+
+output "jira_forms" {
+  description = "Jira form templates managed through the Forms REST API"
+
+  value = {
+    for form_name, form in module.jira_form :
+    form_name => {
+      id          = form.id
+      name        = form.name
+      project_key = form.project_key
+    }
+  }
+}

@@ -6,6 +6,10 @@ terraform {
       source  = "gothub97/atlassian"
       version = "= 0.4.0"
     }
+    restapi = {
+      source  = "Mastercard/restapi"
+      version = "= 3.0.0"
+    }
   }
 }
 
@@ -14,6 +18,25 @@ provider "atlassian" {
   # ATLASSIAN_URL
   # ATLASSIAN_EMAIL
   # ATLASSIAN_API_TOKEN
+}
+
+provider "restapi" {
+  uri = "https://api.atlassian.com/ex/jira/${var.jira_cloud_id}/forms"
+
+  bearer_token          = var.jira_forms_oauth_access_token
+  create_returns_object = true
+
+  headers = {
+    Accept            = "application/json"
+    Content-Type      = "application/json"
+    X-ExperimentalApi = "opt-in"
+  }
+
+  retries {
+    max_retries = 3
+    min_wait    = 1
+    max_wait    = 10
+  }
 }
 
 locals {
@@ -25,6 +48,10 @@ locals {
 
   configuration_profiles = jsondecode(
     file("${local.config_directory}/configuration-profiles.json")
+  )
+
+  forms = jsondecode(
+    file("${local.config_directory}/forms.json")
   )
 
   team_managed_spaces = {
@@ -55,6 +82,15 @@ locals {
       true
     )
   }
+}
+
+module "jira_form" {
+  source = "./modules/jira-form"
+
+  for_each = local.forms
+
+  project_key = module.jira_space[each.value.space].key
+  form        = each.value.form
 }
 
 module "jira_space" {

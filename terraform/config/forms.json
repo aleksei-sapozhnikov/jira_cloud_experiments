@@ -1,0 +1,63 @@
+{
+  "incident-report": {
+    "space": "terraform-demo",
+    "form": {
+      "name": "Incident report",
+      "language": "en",
+      "primary_locale": "en-US",
+      "submit": {
+        "lock": false,
+        "pdf": true
+      },
+      "questions": [
+        {
+          "id": 1,
+          "key": "affected-service",
+          "type": "short_text",
+          "label": "Affected service",
+          "description": "Name the service or component that is affected.",
+          "required": true
+        },
+        {
+          "id": 2,
+          "key": "severity",
+          "type": "radio",
+          "label": "Severity",
+          "required": true,
+          "choices": [
+            "SEV-1 — critical",
+            "SEV-2 — major",
+            "SEV-3 — minor"
+          ]
+        },
+        {
+          "id": 3,
+          "key": "symptoms",
+          "type": "checkboxes",
+          "label": "Observed symptoms",
+          "choices": [
+            "Complete outage",
+            "High error rate",
+            "Increased latency",
+            "Data inconsistency"
+          ]
+        },
+        {
+          "id": 4,
+          "key": "started-on",
+          "type": "date",
+          "label": "Date first observed",
+          "required": true
+        },
+        {
+          "id": 5,
+          "key": "description",
+          "type": "paragraph",
+          "label": "What happened?",
+          "description": "Include impact, timeline, and any mitigation already attempted.",
+          "required": true
+        }
+      ]
+    }
+  }
+}

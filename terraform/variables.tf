@@ -27,3 +27,36 @@ variable "jira_project_lead_account_id" {
     error_message = "jira_project_lead_account_id must contain a real Jira account ID."
   }
 }
+
+variable "jira_cloud_id" {
+  description = "Cloud ID of the Jira site used in Atlassian OAuth API URLs"
+  type        = string
+  nullable    = false
+
+  validation {
+    condition = can(
+      regex(
+        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+        var.jira_cloud_id
+      )
+    )
+
+    error_message = "jira_cloud_id must be a UUID."
+  }
+}
+
+variable "jira_forms_oauth_access_token" {
+  description = "Short-lived Atlassian OAuth 2.0 (3LO) access token used by the Jira Forms API"
+  type        = string
+  sensitive   = true
+  nullable    = false
+
+  validation {
+    condition = (
+      length(trimspace(var.jira_forms_oauth_access_token)) > 0 &&
+      var.jira_forms_oauth_access_token != "replace-with-oauth-access-token"
+    )
+
+    error_message = "jira_forms_oauth_access_token must contain a current OAuth 2.0 (3LO) access token."
+  }
+}

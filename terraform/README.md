@@ -2,7 +2,7 @@
 
 [← Back to the portfolio overview](../README.md#terraform-jira-configuration-as-code)
 
-This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, and manages a Jira Form through the official Forms REST API.
+This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, publishes a JSM portal form, and manages a cross-space Jira Automation rule.
 
 ## Result in brief
 
@@ -12,7 +12,8 @@ After one apply, the demonstration contains:
 - one company-managed space;
 - a reusable workflow, screen, and field-configuration profile;
 - project-to-scheme associations reconciled through an idempotent REST helper;
-- a `Terraform Incident Report` form with text, radio, checkbox, date, and paragraph questions;
+- a portal-published `Terraform Incident Report` form with text, radio, checkbox, date, and paragraph questions;
+- an Automation rule that creates a linked `COMPKANBAN` Incident for each submitted incident request;
 - Terraform outputs with the created space and scheme identifiers.
 
 A second plan in the default `on_terraform_change` mode reports:
@@ -30,6 +31,7 @@ This is the shortest successful check for the portfolio demonstration. The `alwa
 - [Directory structure](#directory-structure)
 - [Configuration files](#configuration-files)
 - [Jira Forms module](#jira-forms-module)
+- [Jira Automation module](#jira-automation-module)
 - [Profile assignment module](#profile-assignment-module)
 - [Authentication and inputs](#authentication-and-inputs)
 - [Authentication setup for Jira Forms](#authentication-setup-for-jira-forms)
@@ -54,7 +56,8 @@ The current configuration demonstrates:
 - field configurations and field-configuration schemes;
 - optional permission schemes where the Jira plan supports them;
 - project-to-scheme associations for company-managed spaces;
-- Jira form templates with a normal Terraform CRUD lifecycle.
+- Jira form templates with a normal Terraform CRUD lifecycle;
+- cross-space Jira Automation rules.
 
 ## Directory structure
 
@@ -63,11 +66,15 @@ terraform/
 ├── config/
 │   ├── spaces.json
 │   ├── configuration-profiles.json
-│   └── forms.json
+│   ├── forms.json
+│   └── automations.json
 ├── modules/
 │   ├── jira-space/
 │   ├── jira-configuration-profile/
 │   ├── jira-form/
+│   ├── jira-automation/
+│   │   └── scripts/
+│   │       └── reconcile-jira-automation.mjs
 │   └── jira-profile-assignment/
 │       └── scripts/
 │           └── assign-jira-profile.mjs
@@ -104,11 +111,11 @@ Jira statuses are global. The supplied workflow uses distinct Terraform-prefixed
 
 ### `config/forms.json`
 
-Defines form templates independently from the native Forms API payload. Each top-level key is a stable Terraform identity. `space` references a key from `spaces.json`, `publish.issue_type` names the work type created when the form is submitted, and `form.questions` uses stable numeric IDs and readable question keys.
+Defines form templates independently from the native Forms API payload. Each top-level key is a stable Terraform identity. `space` references a key from `spaces.json`; `publish.issue_type` and `publish.request_type` use readable names; `publish.portal` controls customer-portal publication; and `form.questions` uses stable numeric IDs and readable question keys.
 
 The demonstration supports `short_text`, `long_text`, `paragraph`, `radio`, `checkboxes`, `dropdown`, `date`, `number`, `email`, and `url`. Choice questions require a non-empty `choices` array.
 
-The work type is selected by its readable name in JSON rather than by a site-specific numeric ID. The root configuration reads the work types belonging to the target space, resolves exactly one matching ID, and passes that ID directly to the form module. The ID is also included in `jira_forms` output for inspection; outputs are not used as inputs inside the same Terraform configuration.
+The work type and request type are selected by readable names rather than by site-specific numeric IDs. The root configuration reads the target space's work types and JSM request types, resolves exactly one match for each, and passes those IDs directly to the form module. The work type ID is also included in `jira_forms` output for inspection; outputs are not used as inputs inside the same Terraform configuration.
 
 The `TFJSM` space uses the team-managed ITSM template, which supplies the standard-level `Report an incident` work type expected by the demonstration form. Terraform reports a targeted validation error if the configured name is absent or ambiguous.
 
@@ -123,9 +130,26 @@ In the team-managed JSM UI, the template-provided work categories are managed pr
 - deterministic UUIDv5 values keep ADF node identities stable between plans;
 - the configured work type name is resolved to its project-specific ID;
 - the form is published for that work type through `publish.jira.issueCreateIssueTypeIds`;
+- the request type is resolved through the JSM API and published through `publish.portal.portalRequestTypeIds`;
 - the generic REST resource owns the returned form ID and performs POST, GET, PUT, and DELETE.
 
-The module intentionally covers a small, useful set of fields. Advanced layout, sections, conditional logic, Jira-field links, request-type publishing, and portal publishing are outside this demonstration rather than being hidden behind an untested universal abstraction.
+The module intentionally covers a small, useful set of fields. Advanced layout, sections, conditional logic, and Jira-field links are outside this demonstration rather than being hidden behind an untested universal abstraction.
+
+### `config/automations.json`
+
+Defines cross-space Automation rules without embedding numeric Jira identifiers. The demonstration listens for `Report an incident` work items in the Terraform-managed JSM space, creates an `Incident` in the existing `COMPKANBAN` space, and links the two work items using Jira's `Relates` link type.
+
+The root configuration resolves the source and target work type IDs, target space ID, and link type ID by name.
+
+## Jira Automation module
+
+`modules/jira-automation` exposes a domain-level interface: stable rule key, source space and work type, target space and work type, link direction, and notification setting. Internally it translates those values into Atlassian Automation components and invokes a small Node.js reconciler.
+
+The reconciler uses the official versioned Automation REST API. It identifies its rule through a stable marker in the description, updates the existing UUID after configuration changes, and safely handles interrupted applies by finding the same marker on the next run. Destroy first disables the rule, as required by Atlassian, and then deletes it.
+
+The script reads the existing `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, and `ATLASSIAN_API_TOKEN` environment variables. Credentials are not included in module inputs, resource state, or command arguments.
+
+Terraform tracks the desired rule through a private `terraform_data` resource. A configuration change reconciles the external rule during apply. A plan performs only read-only Jira lookups; it does not create, update, or delete an Automation rule.
 
 ## Profile assignment module
 
@@ -165,13 +189,14 @@ The Forms API additionally uses:
 
 ```text
 TF_VAR_jira_cloud_id
+TF_VAR_jira_url
 TF_VAR_jira_forms_email
 TF_VAR_jira_forms_api_token
 ```
 
 Terraform automatically maps environment variables named `TF_VAR_<variable_name>` to root module input variables.
 
-The generic REST provider does not read the `ATLASSIAN_*` variables used by the Jira provider. The development container entrypoint automatically maps them to the corresponding `TF_VAR_jira_forms_*` variables, so the email and token are defined only once in `jira-cloud-iac-dev.env`.
+The generic REST provider does not read the `ATLASSIAN_*` variables used by the Jira provider. The development container entrypoint automatically maps the URL, email, and token to the corresponding `TF_VAR_*` variables, so they are defined only once in `jira-cloud-iac-dev.env`.
 
 ## Finding Jira identifiers
 
@@ -237,6 +262,7 @@ tf output jira_spaces
 tf output jira_configuration_profiles
 tf output jira_profile_assignments
 tf output jira_forms
+tf output jira_automations
 ```
 
 Then confirm the stable result:
@@ -252,6 +278,7 @@ Expected result after the initial application:
 - `jira_configuration_profiles` lists the generated workflow, screen, and field-configuration IDs;
 - `jira_profile_assignments` shows the desired project-to-profile associations;
 - `jira_forms` shows the form template ID and owning project;
+- `jira_automations` shows the stable rule identities and enabled states;
 - the subsequent plan reports:
 
 ```text
@@ -330,8 +357,8 @@ For the interview demonstration:
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
 - Jira's public API does not independently create project-scoped work types inside team-managed spaces. The selected JSM ITSM project template supplies `Report an incident`; Terraform then resolves its ID by name and manages the form publication.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
-- The container entrypoint maps Jira credentials to Terraform variables for the generic REST provider; Terraform runs outside the development image must provide those two `TF_VAR_*` variables explicitly.
-- The form is published for Jira work-item creation. Publishing to Jira Service Management request types or a customer portal is intentionally omitted.
+- The container entrypoint maps Jira credentials and URL to Terraform variables for the generic REST provider; Terraform runs outside the development image must provide those `TF_VAR_*` variables explicitly.
+- The Automation adapter manages the demonstrated create-and-link rule shape. Add new component builders deliberately instead of exposing arbitrary Automation JSON through `automations.json`.
 
 ## State and production usage
 

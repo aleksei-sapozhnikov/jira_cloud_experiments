@@ -3,6 +3,8 @@
     "space": "terraform-jsm",
     "publish": {
       "issue_type": "Report an incident",
+      "request_type": "Report an incident",
+      "portal": true,
       "submit_on_create": true,
       "validate_on_create": true
     },

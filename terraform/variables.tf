@@ -45,6 +45,20 @@ variable "jira_cloud_id" {
   }
 }
 
+variable "jira_url" {
+  description = "Base URL of the Jira Cloud site used by REST-backed providers"
+  type        = string
+  nullable    = false
+
+  validation {
+    condition = (
+      startswith(var.jira_url, "https://") &&
+      length(trimspace(var.jira_url)) > length("https://")
+    )
+    error_message = "jira_url must contain the HTTPS URL of the Jira Cloud site."
+  }
+}
+
 variable "jira_forms_email" {
   description = "Atlassian account email used for Jira Forms Basic authentication"
   type        = string

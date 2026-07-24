@@ -40,6 +40,25 @@ provider "restapi" {
   }
 }
 
+provider "restapi" {
+  alias = "jira"
+  uri   = trimsuffix(var.jira_url, "/")
+
+  username = var.jira_forms_email
+  password = var.jira_forms_api_token
+
+  headers = {
+    Accept       = "application/json"
+    Content-Type = "application/json"
+  }
+
+  retries {
+    max_retries = 3
+    min_wait    = 1
+    max_wait    = 10
+  }
+}
+
 locals {
   config_directory = "${path.module}/config"
 
@@ -53,6 +72,10 @@ locals {
 
   forms = jsondecode(
     file("${local.config_directory}/forms.json")
+  )
+
+  automations = jsondecode(
+    file("${local.config_directory}/automations.json")
   )
 
   team_managed_spaces = {
@@ -91,6 +114,29 @@ data "atlassian_jira_issue_types" "form_project" {
   project_id = module.jira_space[each.value.space].id
 }
 
+data "restapi_object" "form_service_desk" {
+  provider = restapi.jira
+  for_each = local.forms
+
+  path         = "/rest/servicedeskapi/servicedesk"
+  results_key  = "values"
+  search_key   = "projectKey"
+  search_value = module.jira_space[each.value.space].key
+}
+
+data "restapi_object" "form_request_type" {
+  provider = restapi.jira
+  for_each = local.forms
+
+  path = format(
+    "/rest/servicedeskapi/servicedesk/%s/requesttype",
+    data.restapi_object.form_service_desk[each.key].id
+  )
+  results_key  = "values"
+  search_key   = "name"
+  search_value = each.value.publish.request_type
+}
+
 locals {
   form_issue_type_matches = {
     for form_key, form in local.forms :
@@ -116,14 +162,108 @@ module "jira_form" {
   project_key = module.jira_space[each.value.space].key
   form        = each.value.form
   publication = {
-    issue_type_id    = local.form_issue_type_ids[each.key]
-    issue_type_name  = each.value.publish.issue_type
-    submit_on_create = try(each.value.publish.submit_on_create, true)
+    issue_type_id     = local.form_issue_type_ids[each.key]
+    issue_type_name   = each.value.publish.issue_type
+    request_type_id   = data.restapi_object.form_request_type[each.key].id
+    request_type_name = each.value.publish.request_type
+    portal            = try(each.value.publish.portal, false)
+    submit_on_create  = try(each.value.publish.submit_on_create, true)
     validate_on_create = try(
       each.value.publish.validate_on_create,
       true
     )
   }
+}
+
+data "atlassian_jira_project" "automation_target" {
+  for_each = local.automations
+
+  key = each.value.target.space_key
+}
+
+data "atlassian_jira_issue_types" "automation_source" {
+  for_each = local.automations
+
+  project_id = module.jira_space[each.value.source.space].id
+}
+
+data "atlassian_jira_issue_types" "automation_target" {
+  for_each = local.automations
+
+  project_id = data.atlassian_jira_project.automation_target[each.key].id
+}
+
+data "restapi_object" "automation_link_type" {
+  provider = restapi.jira
+  for_each = local.automations
+
+  path         = "/rest/api/3/issueLinkType"
+  results_key  = "issueLinkTypes"
+  search_key   = "name"
+  search_value = each.value.link.type
+}
+
+locals {
+  automation_target_issue_type_matches = {
+    for automation_key, automation in local.automations :
+    automation_key => [
+      for issue_type
+      in data.atlassian_jira_issue_types.automation_target[automation_key].issue_types :
+      issue_type
+      if lower(issue_type.name) == lower(automation.target.issue_type)
+    ]
+  }
+
+  automation_target_issue_type_ids = {
+    for automation_key, issue_types
+    in local.automation_target_issue_type_matches :
+    automation_key => length(issue_types) == 1 ? issue_types[0].id : ""
+  }
+
+  automation_source_issue_type_ids = {
+    for automation_key, automation in local.automations :
+    automation_key => length([
+      for issue_type
+      in data.atlassian_jira_issue_types.automation_source[automation_key].issue_types :
+      issue_type.id
+      if lower(issue_type.name) == lower(automation.source.issue_type)
+      ]) == 1 ? one([
+      for issue_type
+      in data.atlassian_jira_issue_types.automation_source[automation_key].issue_types :
+      issue_type.id
+      if lower(issue_type.name) == lower(automation.source.issue_type)
+    ]) : ""
+  }
+}
+
+module "jira_automation" {
+  source = "./modules/jira-automation"
+
+  for_each = local.automations
+
+  automation_key    = each.key
+  name              = each.value.name
+  enabled           = try(each.value.enabled, true)
+  cloud_id          = var.jira_cloud_id
+  source_project_id = module.jira_space[each.value.source.space].id
+  source_issue_type = {
+    id   = local.automation_source_issue_type_ids[each.key]
+    name = each.value.source.issue_type
+  }
+  target_project = {
+    id  = data.atlassian_jira_project.automation_target[each.key].id
+    key = each.value.target.space_key
+  }
+  target_issue_type = {
+    id   = local.automation_target_issue_type_ids[each.key]
+    name = each.value.target.issue_type
+  }
+  link = {
+    id        = data.restapi_object.automation_link_type[each.key].id
+    name      = each.value.link.type
+    direction = each.value.link.direction
+  }
+  send_notifications = try(each.value.send_notifications, false)
 }
 
 module "jira_space" {

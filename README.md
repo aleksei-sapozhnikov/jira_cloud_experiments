@@ -8,7 +8,7 @@ The examples share one Incident/RCA scenario, but they do not have to be deploye
 
 | Experiment | Result | What it demonstrates | Reproduction guide |
 | --- | --- | --- | --- |
-| [Jira configuration with Terraform](#terraform-jira-configuration-as-code) | Creates spaces, reusable schemes, and a multi-field Jira Form. A second demonstration plan is clean. | Terraform modules, JSON-driven configuration, REST resource lifecycle, stable identities, and idempotent reconciliation. | [`terraform/README.md`](terraform/README.md) |
+| [Jira configuration with Terraform](#terraform-jira-configuration-as-code) | Creates spaces, a portal form, reusable schemes, and an Automation rule that creates linked Incidents. A second demonstration plan is clean. | Terraform modules, JSON-driven configuration, REST resource lifecycle, stable identities, and idempotent reconciliation. | [`terraform/README.md`](terraform/README.md) |
 | [Incident / RCA Forge app](#forge-incident--rca-status) | Adds an Incident context panel with **RCA missing**, **RCA incomplete**, or **RCA completed** status. | Forge UI Kit, `issueContext`, Jira REST access, dynamic properties, and minimal scopes. | [`custom-apps/incident-rca-status/README.md`](custom-apps/incident-rca-status/README.md) |
 | [Signed Jira webhook on AWS](#aws-lambda-signed-jira-webhook) | Turns a newly created `URGENT` Bug into a linked Incident and ignores duplicate deliveries. | HMAC validation, Atlassian OAuth, Lambda Function URLs, DynamoDB idempotency, and Jira REST writes. | [`webhook/webhook-receiver-aws-lambda/README.md`](webhook/webhook-receiver-aws-lambda/README.md) |
 | [ScriptRunner Cloud examples](#scriptrunner-cloud-examples) | Creates Incidents for urgent Stories, reconciles an `rca-missing` label, and protects Incident closing transitions. | Listeners, Scheduled Jobs, Script Manager code, Jira expressions, restrictions, and validators. | [`scriptrunner/README.md`](scriptrunner/README.md) |
@@ -104,7 +104,7 @@ copy jira-cloud-iac-dev.env.example jira-cloud-iac-dev.env
 
 Fill in the variables needed by the experiment you selected. `FORGE_API_TOKEN` should contain an Atlassian API scoped token created for Forge. Never commit `jira-cloud-iac-dev.env`; it is excluded by `.gitignore`.
 
-The container entrypoint automatically reuses `ATLASSIAN_EMAIL` and `ATLASSIAN_API_TOKEN` as the Terraform inputs required by the generic Jira Forms provider, so those credentials are defined only once.
+The container entrypoint automatically reuses `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, and `ATLASSIAN_API_TOKEN` as the Terraform inputs required by the REST-backed Jira modules, so the site and credentials are defined only once.
 
 The container also provides the `tf` alias for Terraform-compatible commands. It invokes the executable selected by `TF_CLI` in the env file. The default is `terraform`; after adding OpenTofu to the image, switch the alias by setting `TF_CLI=tofu`.
 
@@ -177,13 +177,14 @@ Add that line to `jira-cloud-iac-dev.env` and restart the container before runni
 
 ### Result
 
-Terraform creates three demonstration spaces, including a team-managed Jira Service Management space, generates a reusable configuration profile, associates its schemes with the company-managed space, and creates a Jira Form through the official Forms REST API. The repository supports:
+Terraform creates three demonstration spaces, including a team-managed Jira Service Management space, generates a reusable configuration profile, associates its schemes with the company-managed space, creates a portal form, and configures an Automation rule that creates a linked Incident in `COMPKANBAN`. The repository supports:
 
 - `on_terraform_change` reconciliation for a clean second plan;
 - `always` reconciliation in every plan for live association checks when that plan is applied.
 - native create/read/update/delete lifecycle for the form template.
+- idempotent reconciliation of Jira Automation through Atlassian's official Automation REST API.
 
-The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Report an incident` work type expected by the form. Terraform resolves its site-specific ID by name and publishes the form for incident creation.
+The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Report an incident` work type and request type expected by the form. Terraform resolves their site-specific IDs by name and publishes the form to the customer portal. Submitting it creates the service request; Jira Automation then creates and links an `Incident` in `COMPKANBAN`.
 
 ### Reproduce
 
@@ -192,6 +193,7 @@ Review:
 - `terraform/config/spaces.json`;
 - `terraform/config/configuration-profiles.json`;
 - `terraform/config/forms.json`;
+- `terraform/config/automations.json`;
 - `TF_VAR_jira_project_lead_account_id` in the local environment file.
 
 Then run inside the development container:
@@ -207,6 +209,7 @@ tf output jira_spaces
 tf output jira_configuration_profiles
 tf output jira_profile_assignments
 tf output jira_forms
+tf output jira_automations
 tf plan
 ```
 

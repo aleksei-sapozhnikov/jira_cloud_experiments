@@ -97,3 +97,16 @@ output "jira_forms" {
     }
   }
 }
+
+output "jira_automations" {
+  description = "Jira Automation rules managed by Terraform"
+
+  value = {
+    for automation_name, automation in module.jira_automation :
+    automation_name => {
+      id      = automation.id
+      name    = automation.name
+      enabled = automation.enabled
+    }
+  }
+}

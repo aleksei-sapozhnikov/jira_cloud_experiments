@@ -1,0 +1,19 @@
+{
+  "jsm-incident-to-compkanban": {
+    "name": "Terraform: create a COMPKANBAN incident from a service request",
+    "enabled": true,
+    "source": {
+      "space": "terraform-jsm",
+      "issue_type": "Report an incident"
+    },
+    "target": {
+      "space_key": "COMPKANBAN",
+      "issue_type": "Incident"
+    },
+    "link": {
+      "type": "Relates",
+      "direction": "inward"
+    },
+    "send_notifications": false
+  }
+}

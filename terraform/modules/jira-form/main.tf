@@ -74,17 +74,30 @@ locals {
         }
       }
     }
-    publish = {
-      jira = {
-        issueCreateIssueTypeIds = [
-          var.publication.issue_type_id
-        ]
-        issueCreateRequestTypeIds      = []
-        recommendedIssueRequestTypeIds = []
-        submitOnCreate                 = var.publication.submit_on_create
-        validateOnCreate               = var.publication.validate_on_create
+    publish = merge(
+      {
+        jira = {
+          issueCreateIssueTypeIds = [
+            var.publication.issue_type_id
+          ]
+          issueCreateRequestTypeIds      = []
+          recommendedIssueRequestTypeIds = []
+          submitOnCreate                 = var.publication.submit_on_create
+          validateOnCreate               = var.publication.validate_on_create
+        }
+      },
+      var.publication.portal
+      ? {
+        portal = {
+          portalRequestTypeIds = [
+            var.publication.request_type_id
+          ]
+          submitOnCreate   = var.publication.submit_on_create
+          validateOnCreate = var.publication.validate_on_create
+        }
       }
-    }
+      : {}
+    )
   }
 }
 
@@ -109,6 +122,13 @@ resource "restapi_object" "form" {
         length(trimspace(var.publication.issue_type_id)) > 0
       )
       error_message = "The publication work type \"${var.publication.issue_type_name}\" was not found in Jira space \"${var.project_key}\". Create work type \"${var.publication.issue_type_name}\" in space \"${var.project_key}\", or correct publish.issue_type in forms.json."
+    }
+
+    precondition {
+      condition = (
+        length(trimspace(var.publication.request_type_id)) > 0
+      )
+      error_message = "The publication request type \"${var.publication.request_type_name}\" was not found in Jira service space \"${var.project_key}\". Create request type \"${var.publication.request_type_name}\" in space \"${var.project_key}\", or correct publish.request_type in forms.json."
     }
   }
 }

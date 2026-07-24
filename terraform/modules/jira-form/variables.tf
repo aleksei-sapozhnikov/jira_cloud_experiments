@@ -99,6 +99,9 @@ variable "publication" {
   type = object({
     issue_type_id      = string
     issue_type_name    = string
+    request_type_id    = string
+    request_type_name  = string
+    portal             = optional(bool, false)
     submit_on_create   = optional(bool, true)
     validate_on_create = optional(bool, true)
   })

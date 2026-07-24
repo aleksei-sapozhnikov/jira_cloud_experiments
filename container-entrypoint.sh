@@ -16,6 +16,11 @@ if [ -n "${ATLASSIAN_API_TOKEN:-}" ] &&
   export TF_VAR_jira_forms_api_token="${ATLASSIAN_API_TOKEN}"
 fi
 
+if [ -n "${ATLASSIAN_URL:-}" ] &&
+  [ -z "${TF_VAR_jira_url:-}" ]; then
+  export TF_VAR_jira_url="${ATLASSIAN_URL}"
+fi
+
 if [ -t 1 ]; then
   printf '%s\n' \
     '+------------------------------------------------------------------+' \

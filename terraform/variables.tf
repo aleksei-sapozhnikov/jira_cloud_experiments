@@ -29,7 +29,7 @@ variable "jira_project_lead_account_id" {
 }
 
 variable "jira_cloud_id" {
-  description = "Cloud ID of the Jira site used in Atlassian OAuth API URLs"
+  description = "Cloud ID of the Jira site used in Jira Forms API URLs"
   type        = string
   nullable    = false
 
@@ -45,18 +45,33 @@ variable "jira_cloud_id" {
   }
 }
 
-variable "jira_forms_oauth_access_token" {
-  description = "Short-lived Atlassian OAuth 2.0 (3LO) access token used by the Jira Forms API"
+variable "jira_forms_email" {
+  description = "Atlassian account email used for Jira Forms Basic authentication"
+  type        = string
+  nullable    = false
+
+  validation {
+    condition = (
+      length(trimspace(var.jira_forms_email)) > 0 &&
+      var.jira_forms_email != "you@example.com"
+    )
+
+    error_message = "jira_forms_email must contain the Atlassian account email used by the Jira API token."
+  }
+}
+
+variable "jira_forms_api_token" {
+  description = "Atlassian API token used for Jira Forms Basic authentication"
   type        = string
   sensitive   = true
   nullable    = false
 
   validation {
     condition = (
-      length(trimspace(var.jira_forms_oauth_access_token)) > 0 &&
-      var.jira_forms_oauth_access_token != "replace-with-oauth-access-token"
+      length(trimspace(var.jira_forms_api_token)) > 0 &&
+      var.jira_forms_api_token != "replace-with-jira-api-token"
     )
 
-    error_message = "jira_forms_oauth_access_token must contain a current OAuth 2.0 (3LO) access token."
+    error_message = "jira_forms_api_token must contain a current Atlassian API token."
   }
 }

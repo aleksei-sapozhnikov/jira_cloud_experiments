@@ -21,9 +21,10 @@ provider "atlassian" {
 }
 
 provider "restapi" {
-  uri = "https://api.atlassian.com/ex/jira/${var.jira_cloud_id}/forms"
+  uri = "https://api.atlassian.com/jira/forms/cloud/${var.jira_cloud_id}"
 
-  bearer_token          = var.jira_forms_oauth_access_token
+  username              = var.jira_forms_email
+  password              = var.jira_forms_api_token
   create_returns_object = true
 
   headers = {

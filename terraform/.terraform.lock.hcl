@@ -28,6 +28,7 @@ provider "registry.terraform.io/mastercard/restapi" {
   version     = "3.0.0"
   constraints = ">= 3.0.0, 3.0.0"
   hashes = [
+    "h1:Fqxoc6bsydl6iWGx6ZvyqUDdGt7Cb4sW/BSHhBeHGgw=",
     "h1:ZVdNsQ/oJHuGxFma/EBlYfsae/e/JbcTcyNAbQhhubA=",
     "zh:0b63bd3c25a31f090a41933f90b7dd6e984add1c4261d8f5caa73f4d5aa065a4",
     "zh:1c3e89cf19118fc07d7b04257251fc9897e722c16e0a0df7b07fcd261f8c12e7",

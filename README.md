@@ -70,7 +70,7 @@ The experiments have different prerequisites and can be evaluated independently:
 
 | Experiment | Jira access | Additional prerequisites | Deployment model |
 | --- | --- | --- | --- |
-| Terraform | Jira administrator, API token, and OAuth 2.0 (3LO) grant for Forms | Docker or Podman | Automated by Terraform, including a REST-backed Forms resource |
+| Terraform | Jira administrator and API token | Docker or Podman | Automated by Terraform, including a REST-backed Forms resource |
 | Forge app | Permission to deploy and install Forge apps | Docker or Podman; Forge credentials | Forge CLI |
 | AWS webhook | Permission to create and link work items | AWS account; Atlassian OAuth client | Source is included; AWS resources are configured manually |
 | ScriptRunner | ScriptRunner for Jira Cloud | Permission to edit the selected workflows | Source is included; configuration is copied into the Jira and ScriptRunner editors |

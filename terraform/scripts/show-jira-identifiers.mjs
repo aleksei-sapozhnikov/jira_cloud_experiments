@@ -2,7 +2,7 @@
  * Displays Jira identifiers derived from the configured site and credentials.
  *
  * Terraform uses the authenticated user's account ID for project leads and the
- * Cloud ID to address the Jira Forms OAuth API.
+ * Cloud ID to address the Jira Forms API.
  */
 
 const requiredVariables = [
@@ -67,4 +67,9 @@ if (currentUser?.accountId || tenant?.cloudId) {
   if (tenant?.cloudId) {
     console.log(`TF_VAR_jira_cloud_id=${tenant.cloudId}`);
   }
+
+  console.log(`TF_VAR_jira_forms_email=${process.env.ATLASSIAN_EMAIL}`);
+  console.log(
+    'TF_VAR_jira_forms_api_token=copy-ATLASSIAN_API_TOKEN-value',
+  );
 }

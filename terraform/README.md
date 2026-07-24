@@ -32,7 +32,7 @@ This is the shortest successful check for the portfolio demonstration. The `alwa
 - [Jira Forms module](#jira-forms-module)
 - [Profile assignment module](#profile-assignment-module)
 - [Authentication and inputs](#authentication-and-inputs)
-- [OAuth setup for Jira Forms](#oauth-setup-for-jira-forms)
+- [Authentication setup for Jira Forms](#authentication-setup-for-jira-forms)
 - [Finding Jira identifiers](#finding-jira-identifiers)
 - [Running Terraform](#running-terraform)
 - [Reconciliation modes](#reconciliation-modes)
@@ -157,12 +157,13 @@ The Forms API additionally uses:
 
 ```text
 TF_VAR_jira_cloud_id
-TF_VAR_jira_forms_oauth_access_token
+TF_VAR_jira_forms_email
+TF_VAR_jira_forms_api_token
 ```
 
 Terraform automatically maps environment variables named `TF_VAR_<variable_name>` to root module input variables.
 
-When using the root development container, define these values in `jira-cloud-iac-dev.env`, copied from `jira-cloud-iac-dev.env.example`.
+The generic REST provider does not read the `ATLASSIAN_*` variables used by the Jira provider. Copy the same email and API token into the corresponding `TF_VAR_jira_forms_*` entries in `jira-cloud-iac-dev.env`. Do not commit the local environment file.
 
 ## Finding Jira identifiers
 
@@ -186,24 +187,23 @@ TF_VAR_jira_cloud_id=returned-cloud-id
 
 Restart the container after editing the env file.
 
-Expected result: the script prints the current Jira user, account ID, Cloud ID, and ready-to-copy Terraform environment-variable lines.
+Expected result: the script prints the current Jira user, account ID, Cloud ID, and ready-to-copy Terraform environment-variable lines. It deliberately prints a placeholder for the Forms API token rather than exposing the existing secret.
 
-## OAuth setup for Jira Forms
+## Authentication setup for Jira Forms
 
-Atlassian requires OAuth 2.0 authorization-code grants (3LO) for external integrations; it does not offer a client-credentials grant for this API. Create an OAuth 2.0 integration in the Atlassian developer console and grant:
+This local Terraform demonstration uses the authentication method Atlassian documents for personal scripts, bots, and ad-hoc Forms API calls: an Atlassian account email with an API token.
 
-```text
-read:jira-work
-manage:jira-project
-```
-
-Complete the interactive consent and authorization-code exchange, then place the returned access token in the local environment file:
+Copy the existing Jira credentials in the local environment file:
 
 ```dotenv
-TF_VAR_jira_forms_oauth_access_token=returned-access-token
+ATLASSIAN_EMAIL=you@example.com
+ATLASSIAN_API_TOKEN=your-api-token
+
+TF_VAR_jira_forms_email=you@example.com
+TF_VAR_jira_forms_api_token=your-api-token
 ```
 
-The access token is short-lived. Refresh it before a later Terraform run. A production integration should obtain and rotate tokens outside Terraform through a secret manager or CI identity step; access and refresh tokens must not be committed or stored in JSON configuration.
+Restart the development container after editing the file because Docker reads `--env-file` only at container creation. The API token must belong to a user with the Administer Jira project permission for the target project.
 
 ## Running Terraform
 
@@ -324,7 +324,7 @@ For the interview demonstration:
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
-- Forms OAuth uses a short-lived 3LO access token; token renewal is intentionally outside this Terraform module.
+- Jira Forms credentials are supplied twice under different environment-variable names because the two Terraform providers use different configuration mechanisms.
 - The form is created as an unattached project template. Publishing it to request types requires site-specific IDs and is intentionally omitted.
 
 ## State and production usage

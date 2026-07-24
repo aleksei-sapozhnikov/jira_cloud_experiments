@@ -92,4 +92,13 @@ resource "restapi_object" "form" {
   data         = jsonencode(local.payload)
 
   ignore_server_additions = true
+
+  lifecycle {
+    precondition {
+      condition = (
+        length(trimspace(var.publication.issue_type_id)) > 0
+      )
+      error_message = "The publication work type \"${var.publication.issue_type_name}\" was not found in Jira space \"${var.project_key}\". Create work type \"${var.publication.issue_type_name}\" in space \"${var.project_key}\", or correct publish.issue_type in forms.json."
+    }
+  }
 }

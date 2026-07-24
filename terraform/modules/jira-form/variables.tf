@@ -104,9 +104,4 @@ variable "publication" {
   })
 
   nullable = false
-
-  validation {
-    condition     = length(trimspace(var.publication.issue_type_id)) > 0
-    error_message = "The publication work type was not found in the form's Jira space. Create it in the space or correct publish.issue_type in forms.json."
-  }
 }

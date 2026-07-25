@@ -2,7 +2,7 @@
 
 [← Back to the portfolio overview](../README.md#terraform-jira-configuration-as-code)
 
-This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, publishes a JSM portal form, and manages a cross-space Jira Automation rule.
+This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, publishes a JSM portal form, and manages the Incident/RCA Jira Automation flows.
 
 ## Result in brief
 
@@ -13,7 +13,8 @@ After one apply, the demonstration contains:
 - a reusable workflow, screen, and field-configuration profile;
 - project-to-scheme associations reconciled through an idempotent REST helper;
 - a portal-published `Terraform Incident Report` form with text, radio, checkbox, date, and paragraph questions;
-- an Automation rule that creates a linked `COMPKANBAN` Incident for each submitted incident request;
+- an Automation flow that creates a linked `TFCLS` Incident for each submitted incident request;
+- an Automation flow that initializes each `TFCLS` Incident and creates its linked RCA Task;
 - Terraform outputs with the created space and scheme identifiers.
 
 A second plan in the default `on_terraform_change` mode reports:
@@ -137,13 +138,24 @@ The module intentionally covers a small, useful set of fields. Advanced layout, 
 
 ### `config/automations.json`
 
-Defines cross-space Automation rules without embedding numeric Jira identifiers. The demonstration listens for `Report an incident` work items in the Terraform-managed JSM space, creates an `Incident` in the existing `COMPKANBAN` space, and links the two work items using Jira's `Relates` link type.
+Defines Automation flows without embedding numeric Jira identifiers. The intake
+flow listens for `Report an incident` work items in the Terraform-managed JSM
+space, creates an `Incident` in `TFCLS`, and links the two work items using
+Jira's `Relates` link type. The Incident initialization flow listens in
+`TFCLS`, adds the configured labels, and creates a linked `Task` carrying the
+`rca` label.
 
-The root configuration resolves the source and target work type IDs, target space ID, and link type ID by name.
+The root configuration resolves source and target work type IDs, managed space
+IDs, and link type IDs by readable names.
 
 ## Jira Automation module
 
-`modules/jira-automation` exposes a domain-level interface: stable rule key, source space and work type, target space and work type, link direction, and notification setting. Internally it translates those values into Atlassian Automation components and invokes a small Node.js reconciler.
+`modules/jira-automation` exposes domain recipes for creating a linked work item
+and initializing an Incident with an RCA Task. Internally it translates those
+values into Atlassian Automation components and invokes a small Node.js
+reconciler. `allow_other_rule_triggers` maps to Jira's **Allow flow trigger**
+setting, which is enabled for the Incident initialization flow because its
+Incident may be created by the intake flow.
 
 The reconciler uses the official versioned Automation REST API. It identifies its rule through a stable marker in the description, updates the existing UUID after configuration changes, and safely handles interrupted applies by finding the same marker on the next run. Destroy first disables the rule, as required by Atlassian, and then deletes it.
 
@@ -352,6 +364,12 @@ For the interview demonstration:
 ## Important limitations
 
 - The workflow-scheme association endpoint used by this example requires an empty company-managed project. Existing work items may require a migration-aware workflow switch.
+- Workflow transitions are created by Terraform but ignored after creation.
+  Jira stores ScriptRunner conditions, validators, and other app extensions
+  inside those transition blocks, and reconciling the whole block would delete
+  rules that the provider cannot declare. Consequently, transition topology
+  changes must be migrated deliberately rather than applied by editing the
+  profile JSON.
 - Jira Free does not allow creation of custom permission schemes. The supplied profile therefore disables permission-scheme creation.
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.

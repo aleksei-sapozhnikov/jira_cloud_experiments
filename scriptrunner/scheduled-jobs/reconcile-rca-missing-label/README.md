@@ -9,11 +9,12 @@ Configure the job to run once per day at **12:00 UTC**.
 The scope is defined by `INCIDENT_JQL` at the top of `script.groovy`:
 
 ```jql
-issuetype = "Incident"
+    project = "TFCLS"
+    AND issuetype = "Incident"
 AND statusCategory != Done
 ```
 
-This selects open Incidents. Add a project or other criteria before using the example outside a small demo site.
+This selects open Incidents in the Terraform Classic Scrum space.
 
 ## What the job does
 

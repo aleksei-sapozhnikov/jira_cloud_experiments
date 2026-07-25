@@ -11,7 +11,8 @@
 import incident.IncidentRcaService
 
 final String INCIDENT_JQL = '''
-    issuetype = "Incident"
+    project = "TFCLS"
+    AND issuetype = "Incident"
     AND statusCategory != Done
 '''.stripIndent().trim()
 

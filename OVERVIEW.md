@@ -31,13 +31,20 @@ No changes. Your infrastructure matches the configuration.
 
 The automation examples form this end-to-end scenario:
 
-```text
-JSM Form ──> Service request ── Jira Automation ──┐
-URGENT Bug ── signed webhook + AWS Lambda ────────┼──> Incident ── Jira Automation ──> RCA Task [rca]
-URGENT Story ── ScriptRunner listener ────────────┘        │
-                                                          ├── Forge displays RCA status
-                                                          ├── Scheduled Job reconciles rca-missing
-                                                          └── workflow validators protect completion
+```mermaid
+flowchart LR
+  form["Jira Service Management (JSM)<br>portal Form"] --> request["Service request"] --> intake["Jira Automation"]
+  story["Urgent Story created"] --> listener["ScriptRunner Script Listener"]
+  bug["Urgent Bug created"] --> lambda["Signed Jira webhook<br>AWS Lambda"]
+
+  intake --> incident["Incident"]
+  listener --> incident
+  lambda --> incident
+
+  incident --> initialization["Jira Automation"] --> rca["RCA Task<br>(must be Done)"]
+  incident -.- status["RCA status indicator<br>(custom app)"]
+  incident -.- reconciliation["rca-missing reconciliation<br>(ScriptRunner Scheduled Job)"]
+  incident -.- validation["Workflow transition validation<br>(ScriptRunner Validate details)"]
 ```
 
 Both Jira Automation flows are managed by Terraform: the JSM intake flow creates

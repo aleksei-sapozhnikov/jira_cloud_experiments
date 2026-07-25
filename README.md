@@ -20,12 +20,20 @@ described in their sections.
 
 ### Incident/RCA workflow
 
-```text
-JSM portal Form -> Service request -> Jira Software Incident -> RCA Task
-                                               |              |
-                                               |              +-- must be Done
-                                               +-- RCA status indicator (custom app)
-                                               +-- workflow validation
+```mermaid
+flowchart LR
+  form["Jira Service Management (JSM)<br>portal Form"] --> request["Service request"] --> intake["Jira Automation"]
+  story["Urgent Story created"] --> listener["ScriptRunner Script Listener"]
+  bug["Urgent Bug created"] --> lambda["Signed Jira webhook<br>AWS Lambda"]
+
+  intake --> incident["Incident"]
+  listener --> incident
+  lambda --> incident
+
+  incident --> initialization["Jira Automation"] --> rca["RCA Task<br>(must be Done)"]
+  incident -.- status["RCA status indicator<br>(custom app)"]
+  incident -.- reconciliation["rca-missing reconciliation<br>(ScriptRunner Scheduled Job)"]
+  incident -.- validation["Workflow transition validation<br>(ScriptRunner Validate details)"]
 ```
 
 ---

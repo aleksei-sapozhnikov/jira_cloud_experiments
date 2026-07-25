@@ -13,7 +13,9 @@ approaches so their responsibilities and trade-offs can be compared, while
 every experiment remains independently reviewable.
 [Compare the experiments and their prerequisites.](OVERVIEW.md#choose-what-to-reproduce)
 
-## Incident/RCA workflow
+---
+
+### Incident/RCA workflow
 
 ```text
 JSM portal Form -> Service request -> Jira Software Incident -> RCA Task
@@ -22,6 +24,8 @@ JSM portal Form -> Service request -> Jira Software Incident -> RCA Task
                                                +-- RCA status indicator (custom app)
                                                +-- workflow validation
 ```
+
+---
 
 ### Service request intake
 
@@ -33,6 +37,8 @@ the Incident and creates its linked RCA Task. Terraform also manages the
 projects, reusable schemes, and both Automation flows.
 [See the Terraform design and configuration.](terraform/README.md)
 
+---
+
 ### Workflow enforcement and reconciliation
 
 The Incident workflow then enforces the business rule: an Incident cannot move
@@ -41,12 +47,16 @@ provide explicit errors. A scheduled ScriptRunner job marks inconsistent open
 Incidents with `rca-missing` instead of silently inventing or deleting
 relationships. [See the ScriptRunner rules.](scriptrunner/README.md)
 
+---
+
 ### Custom app RCA status indicator
 
 A custom Jira app shows **RCA missing**, **RCA incomplete**, or **RCA
 completed** directly on the Incident. The same state remains visible as a
 compact badge when the panel is collapsed.
 [See the custom app implementation.](custom-apps/incident-rca-status/README.md)
+
+---
 
 ### Additional incident sources
 
@@ -67,7 +77,9 @@ and [signed webhook receiver](webhook/webhook-receiver-aws-lambda/README.md).
   />
 </details>
 
-## GitHub integration
+---
+
+### GitHub integration
 
 Branch names and pull request titles contain `TFCLS-*` work item keys. Jira's
 GitHub integration uses those keys to associate development activity with the
@@ -77,7 +89,9 @@ requests for [Terraform configuration](https://github.com/aleksei-sapozhnikov/ji
 [Incident/RCA integrations](https://github.com/aleksei-sapozhnikov/jira_cloud_experiments/pull/2),
 and the [combined portfolio](https://github.com/aleksei-sapozhnikov/jira_cloud_experiments/pull/3).
 
-## Implementation notes
+---
+
+### Implementation notes
 
 Terraform manages the Jira spaces, reusable schemes, Form, and both Automation
 flows. Human-readable JSON configuration is translated into site-specific Jira

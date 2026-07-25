@@ -74,7 +74,7 @@ RCA Task, the indicator changing to completed after that Task is closed, and a
 second Incident marked `rca-missing` being rejected by the workflow validator.
 
 <details>
-  <summary><strong>▶ Watch: RCA status and workflow validation</strong></summary>
+  <summary><strong>▶ Watch: workflow validation and RCA status</strong></summary>
   <br />
   <img
     src="assets/demos/workflow-enforcement-and-rca-status.gif"

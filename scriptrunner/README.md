@@ -8,7 +8,7 @@ The repository stores the source files, but does not deploy ScriptRunner configu
 
 ## Result in brief
 
-With the selected examples configured:
+With the selected examples configured for `TFCLS`:
 
 - a newly created `URGENT` Story creates or reuses a linked Incident;
 - a daily job adds `rca-missing` to open Incidents without a linked RCA and removes the stale label after a link appears;
@@ -60,6 +60,7 @@ The repository path `scriptrunner/scriptmanager/incident/IncidentRcaService.groo
 
 The shared Groovy service intentionally uses Jira names instead of environment-specific numeric IDs:
 
+- space key: `TFCLS`;
 - source work type: `Story`;
 - Incident work type: `Incident`;
 - RCA work type: `Task`;
@@ -71,6 +72,12 @@ The shared Groovy service intentionally uses Jira names instead of environment-s
 Change the constants in `scriptmanager/incident/IncidentRcaService.groovy` and the corresponding values in the Jira expressions if a Jira site uses different names.
 
 The expressions use the status-category key `done` rather than a particular status name. This lets custom completion statuses work as long as they belong to Jira's Done status category.
+
+Script Manager reuse applies to Groovy editors such as Listener actions and
+Scheduled Jobs. Workflow **Restrict transition** and **Validate details** rules
+run Jira expressions and cannot import or load a Script Manager object. A rule
+must therefore be added to each required workflow transition; the repository
+keeps the expression as the canonical copy.
 
 ## Expected Jira behavior
 

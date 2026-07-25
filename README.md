@@ -59,14 +59,26 @@ provide explicit errors. A scheduled ScriptRunner job marks inconsistent open
 Incidents with `rca-missing` instead of silently inventing or deleting
 relationships. [See the ScriptRunner rules.](scriptrunner/README.md)
 
----
-
 ### Custom app RCA status indicator
 
 A custom Jira app shows **RCA missing**, **RCA incomplete**, or **RCA
 completed** directly on the Incident. The same state remains visible as a
 compact badge when the panel is collapsed.
 [See the custom app implementation.](custom-apps/incident-rca-status/README.md)
+
+The recording connects the UI and policy layers: it shows an incomplete linked
+RCA Task, the indicator changing to completed after that Task is closed, and a
+second Incident marked `rca-missing` being rejected by the workflow validator.
+
+<details>
+  <summary><strong>▶ Watch: RCA status and workflow validation</strong></summary>
+  <br />
+  <img
+    src="assets/demos/workflow-enforcement-and-rca-status.gif"
+    width="960"
+    alt="The RCA indicator changes state and a workflow validator blocks an invalid transition"
+  />
+</details>
 
 ---
 

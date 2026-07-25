@@ -2,6 +2,12 @@
 set -eu
 
 export TF_CLI="${TF_CLI:-terraform}"
+export FORGE_USAGE_ANALYTICS="${FORGE_USAGE_ANALYTICS:-false}"
+
+# Forge requires an explicit analytics preference before any command can use
+# --non-interactive. Disposable containers do not retain the CLI setting, so
+# reconcile it from the environment whenever a container starts.
+forge settings set usage-analytics "${FORGE_USAGE_ANALYTICS}" >/dev/null
 
 # The Jira provider reads ATLASSIAN_* directly, while the generic REST
 # provider receives credentials through Terraform input variables. Reuse the

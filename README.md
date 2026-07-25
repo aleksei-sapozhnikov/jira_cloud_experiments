@@ -87,8 +87,8 @@ second Incident marked `rca-missing` being rejected by the workflow validator.
 
 ### Incident creation via ScriptRunner
 
-A ScriptRunner listener creates or reuses a linked Incident for an urgent Story,
-providing an entry point outside Jira Automation.
+A ScriptRunner listener creates a linked Incident for an urgent Story if one
+does not already exist, providing an entry point outside Jira Automation.
 [See the listener implementation.](scriptrunner/script-listeners/create-incident-for-urgent-story/README.md)
 
 ### Incident creation via AWS Lambda

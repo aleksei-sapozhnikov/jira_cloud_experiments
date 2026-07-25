@@ -43,7 +43,7 @@ portal form to all three linked work items.
 [See the Terraform design and configuration.](terraform/README.md)
 
 <details>
-  <summary><strong>▶ Watch: a service request creates an Incident and RCA Task</strong></summary>
+  <summary><strong>▶ Watch: Service request intake creates an Incident and RCA Task</strong></summary>
   <br />
   <img
     src="assets/demos/service-request-intake.gif"
@@ -62,7 +62,7 @@ provide explicit errors. A scheduled ScriptRunner job marks inconsistent open
 Incidents with `rca-missing` instead of silently inventing or deleting
 relationships. [See the ScriptRunner rules.](scriptrunner/README.md)
 
-### Custom app RCA status indicator
+### RCA status indicator via custom app
 
 A custom Jira app shows **RCA missing**, **RCA incomplete**, or **RCA
 completed** directly on the Incident. The same state remains visible as a
@@ -74,7 +74,7 @@ RCA Task, the indicator changing to completed after that Task is closed, and a
 second Incident marked `rca-missing` being rejected by the workflow validator.
 
 <details>
-  <summary><strong>▶ Watch: workflow validation and RCA status</strong></summary>
+  <summary><strong>▶ Watch: Workflow enforcement and RCA status indicator</strong></summary>
   <br />
   <img
     src="assets/demos/workflow-enforcement-and-rca-status.gif"
@@ -95,7 +95,7 @@ idempotency. Both feed the resulting Incident into the same RCA workflow.
 and [signed webhook receiver](webhook/webhook-receiver-aws-lambda/README.md).
 
 <details>
-  <summary><strong>▶ Watch: urgent Story and Bug create linked Incidents</strong></summary>
+  <summary><strong>▶ Watch: Additional incident sources create linked Incidents</strong></summary>
   <br />
   <img
     src="assets/demos/additional-incident-sources.gif"
@@ -121,7 +121,7 @@ item key to its matching GitHub branch and pull request and back to the populate
 Development panel in Jira.
 
 <details>
-  <summary><strong>▶ Watch: Jira associates GitHub development activity</strong></summary>
+  <summary><strong>▶ Watch: GitHub integration associates development activity</strong></summary>
   <br />
   <img
     src="assets/demos/github-integration.gif"

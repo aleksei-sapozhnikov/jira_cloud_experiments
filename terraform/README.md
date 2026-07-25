@@ -1,6 +1,6 @@
 # Jira configuration with Terraform
 
-[Two-minute overview](../DEMO.md) · [Portfolio overview](../README.md#terraform-jira-configuration-as-code)
+[Two-minute overview](../README.md) · [Portfolio overview](../OVERVIEW.md#terraform-jira-configuration-as-code)
 
 This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, publishes a JSM portal form, and manages the Incident/RCA Jira Automation flows.
 
@@ -392,5 +392,5 @@ For team or production usage:
 
 ## Related documentation
 
-- [Portfolio overview](../README.md#terraform-jira-configuration-as-code)
+- [Portfolio overview](../OVERVIEW.md#terraform-jira-configuration-as-code)
 - [Forge app](../custom-apps/incident-rca-status/README.md)

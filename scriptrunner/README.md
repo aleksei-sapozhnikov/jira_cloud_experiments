@@ -1,6 +1,6 @@
 # ScriptRunner for Jira Cloud examples
 
-[Two-minute overview](../DEMO.md) · [Portfolio overview](../README.md#scriptrunner-cloud-examples)
+[Two-minute overview](../README.md) · [Portfolio overview](../OVERVIEW.md#scriptrunner-cloud-examples)
 
 This directory contains ScriptRunner source used by the Incident/RCA demonstration. The examples cover an event-driven Script Listener, a daily Scheduled Job, reusable Script Manager code, a workflow restriction, and workflow validators.
 

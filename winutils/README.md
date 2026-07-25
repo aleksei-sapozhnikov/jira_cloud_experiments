@@ -1,6 +1,6 @@
 # Windows utilities
 
-[← Back to the shared development environment](../README.md#shared-development-environment)
+[← Back to the shared development environment](../OVERVIEW.md#shared-development-environment)
 
 This directory contains optional Command Prompt wrappers for building and starting the repository development environment on Windows.
 
@@ -62,10 +62,10 @@ The scripts use the image name:
 jira-cloud-iac-dev
 ```
 
-To force a particular runtime when both are installed, run the equivalent `docker` or `podman` command manually as documented in the [root README](../README.md#shared-development-environment).
+To force a particular runtime when both are installed, run the equivalent `docker` or `podman` command manually as documented in the [portfolio overview](../OVERVIEW.md#shared-development-environment).
 
 ## Related documentation
 
-- [Portfolio overview](../README.md#results-at-a-glance)
+- [Portfolio overview](../OVERVIEW.md#results-at-a-glance)
 - [Forge app](../custom-apps/incident-rca-status/README.md)
 - [Terraform configuration](../terraform/README.md)

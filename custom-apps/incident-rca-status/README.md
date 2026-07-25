@@ -1,6 +1,6 @@
 # Incident / RCA Status Forge app
 
-[Two-minute overview](../../DEMO.md) · [Portfolio overview](../../README.md#forge-incident--rca-status)
+[Two-minute overview](../../README.md) · [Portfolio overview](../../OVERVIEW.md#forge-incident--rca-status)
 
 This directory contains an Atlassian Forge UI Kit app for Jira Cloud. It adds an **Incident / RCA** context panel to Incident work items in `TFCLS` and summarizes the state of linked RCA work items.
 
@@ -44,7 +44,7 @@ Important files:
 
 ## Prerequisites
 
-The root development container includes Node.js and Forge CLI. Start it using the instructions in the [root README](../../README.md#shared-development-environment).
+The root development container includes Node.js and Forge CLI. Start it using the instructions in the [portfolio overview](../../OVERVIEW.md#shared-development-environment).
 
 The container receives Forge credentials and the Jira URL from the root `jira-cloud-iac-dev.env` file:
 
@@ -157,5 +157,5 @@ The supplied app is read-only and requests the Jira read scope declared in `mani
 
 ## Related documentation
 
-- [Portfolio overview](../../README.md#forge-incident--rca-status)
+- [Portfolio overview](../../OVERVIEW.md#forge-incident--rca-status)
 - [Terraform configuration](../../terraform/README.md)

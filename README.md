@@ -37,7 +37,9 @@ URGENT Story ── ScriptRunner listener ─────────┘        
                                                        └── workflow rule protects closing
 ```
 
-The Jira Automation rule that creates the RCA Task is an external part of the demonstration and is not exported by this repository.
+Both Jira Automation flows are managed by Terraform: the JSM intake flow creates
+the Incident in `TFCLS`, and the Incident initialization flow adds its
+processing label and creates the linked RCA Task.
 
 ## What I explored
 
@@ -102,7 +104,7 @@ Windows Command Prompt:
 copy jira-cloud-iac-dev.env.example jira-cloud-iac-dev.env
 ```
 
-Fill in the variables needed by the experiment you selected. `FORGE_API_TOKEN` should contain an Atlassian API scoped token created for Forge. Never commit `jira-cloud-iac-dev.env`; it is excluded by `.gitignore`.
+Fill in the variables needed by the experiment you selected. `FORGE_API_TOKEN` should contain an Atlassian API scoped token created for Forge. `FORGE_USAGE_ANALYTICS` supplies the explicit analytics preference required by non-interactive Forge commands and defaults to `false`. Never commit `jira-cloud-iac-dev.env`; it is excluded by `.gitignore`.
 
 The container entrypoint automatically reuses `ATLASSIAN_URL`, `ATLASSIAN_EMAIL`, and `ATLASSIAN_API_TOKEN` as the Terraform inputs required by the REST-backed Jira modules, so the site and credentials are defined only once.
 
@@ -177,14 +179,14 @@ Add that line to `jira-cloud-iac-dev.env` and restart the container before runni
 
 ### Result
 
-Terraform creates three demonstration spaces, including a team-managed Jira Service Management space, generates a reusable configuration profile, associates its schemes with the company-managed space, creates a portal form, and configures an Automation rule that creates a linked Incident in `COMPKANBAN`. The repository supports:
+Terraform creates three demonstration spaces, including a team-managed Jira Service Management space, generates a reusable configuration profile, associates its schemes with the company-managed `TFCLS` space, creates a portal form, and configures the Incident/RCA Automation flows. The repository supports:
 
 - `on_terraform_change` reconciliation for a clean second plan;
 - `always` reconciliation in every plan for live association checks when that plan is applied.
 - native create/read/update/delete lifecycle for the form template.
 - idempotent reconciliation of Jira Automation through Atlassian's official Automation REST API.
 
-The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Report an incident` work type and request type expected by the form. Terraform resolves their site-specific IDs by name and publishes the form to the customer portal. Submitting it creates the service request; Jira Automation then creates and links an `Incident` in `COMPKANBAN`.
+The `TFJSM` space uses Jira Service Management's team-managed ITSM template, which supplies the `Report an incident` work type and request type expected by the form. Terraform resolves their site-specific IDs by name and publishes the form to the customer portal. Submitting it creates the service request; Jira Automation then creates and links an `Incident` in `TFCLS`, where a second Terraform-managed flow creates the RCA Task.
 
 ### Reproduce
 

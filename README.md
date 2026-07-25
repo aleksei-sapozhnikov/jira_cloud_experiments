@@ -57,6 +57,16 @@ idempotency. Both feed the resulting Incident into the same RCA workflow.
 [See the listener](scriptrunner/script-listeners/create-incident-for-urgent-story/README.md)
 and [signed webhook receiver](webhook/webhook-receiver-aws-lambda/README.md).
 
+<details>
+  <summary><strong>▶ Watch: urgent Story and Bug create linked Incidents</strong></summary>
+  <br />
+  <img
+    src="assets/demos/additional-incident-sources.gif"
+    width="960"
+    alt="An urgent Story and an urgent Bug each create a linked Incident"
+  />
+</details>
+
 ## GitHub integration
 
 Branch names and pull request titles contain `TFCLS-*` work item keys. Jira's

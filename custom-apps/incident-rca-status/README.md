@@ -2,7 +2,7 @@
 
 [← Back to the portfolio overview](../../README.md#forge-incident--rca-status)
 
-This directory contains an Atlassian Forge UI Kit app for Jira Cloud. It adds an **Incident / RCA** context panel to Incident work items and summarizes the state of linked RCA work items.
+This directory contains an Atlassian Forge UI Kit app for Jira Cloud. It adds an **Incident / RCA** context panel to Incident work items in `TFCLS` and summarizes the state of linked RCA work items.
 
 ## Result in brief
 
@@ -111,7 +111,7 @@ forge install --non-interactive --upgrade \
 
 ## Expected Jira behavior
 
-The panel is configured for the `Incident` work type. On an Incident work item, it should:
+The panel is configured for the `Incident` work type in `TFCLS`. On a matching Incident work item, it should:
 
 - show the **Incident / RCA** context panel;
 - locate linked work items marked as RCA items by the app logic;
@@ -141,7 +141,9 @@ No linked work item with the `rca` label was found.
 
 ![RCA missing in expanded and collapsed views](../../assets/incident-rca-status/rca-missing.png)
 
-The Terraform part of this repository configures demo Jira spaces and schemes, but it does not create all example Incident/RCA work items required to populate the panel.
+Terraform configures the `TFCLS` space and both Automation flows. A submitted
+portal request or another configured Incident source supplies the live work
+items that populate the panel.
 
 ## App identity
 

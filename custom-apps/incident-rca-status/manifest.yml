@@ -15,7 +15,9 @@ modules:
       dynamicProperties:
         function: dynamic-properties
       displayConditions:
-        issueType: Incident
+        and:
+          issueType: Incident
+          projectKey: TFCLS
   function:
     - key: resolver
       handler: index.handler

@@ -85,17 +85,21 @@ second Incident marked `rca-missing` being rejected by the workflow validator.
 
 ---
 
-### Additional incident sources
+### Incident creation via ScriptRunner
 
-Two additional entry points create Incidents outside Jira Automation: a
-ScriptRunner listener creates or reuses an Incident for an urgent Story, and a
-signed AWS Lambda webhook handles urgent Bugs with HMAC validation and DynamoDB
-idempotency. Both feed the resulting Incident into the same RCA workflow.
-[See the listener](scriptrunner/script-listeners/create-incident-for-urgent-story/README.md)
-and [signed webhook receiver](webhook/webhook-receiver-aws-lambda/README.md).
+A ScriptRunner listener creates or reuses a linked Incident for an urgent Story,
+providing an entry point outside Jira Automation.
+[See the listener implementation.](scriptrunner/script-listeners/create-incident-for-urgent-story/README.md)
+
+### Incident creation via AWS Lambda
+
+A signed AWS Lambda webhook creates a linked Incident for an urgent Bug, with
+HMAC validation and DynamoDB idempotency. Both entry points feed the resulting
+Incident into the same RCA workflow.
+[See the signed webhook receiver.](webhook/webhook-receiver-aws-lambda/README.md)
 
 <details>
-  <summary><strong>▶ Watch: Additional incident sources create linked Incidents</strong></summary>
+  <summary><strong>▶ Watch: Incident creation via ScriptRunner and AWS Lambda</strong></summary>
   <br />
   <img
     src="assets/demos/additional-incident-sources.gif"

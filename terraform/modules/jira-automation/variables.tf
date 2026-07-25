@@ -4,6 +4,20 @@ variable "automation_key" {
   nullable    = false
 }
 
+variable "kind" {
+  description = "Domain recipe used to build the Jira Automation rule"
+  type        = string
+  nullable    = false
+
+  validation {
+    condition = contains(
+      ["create_linked_work_item", "create_incident_rca"],
+      var.kind
+    )
+    error_message = "kind must be create_linked_work_item or create_incident_rca."
+  }
+}
+
 variable "name" {
   description = "Display name of the Jira Automation rule"
   type        = string
@@ -14,6 +28,13 @@ variable "enabled" {
   description = "Whether the Jira Automation rule is enabled"
   type        = bool
   default     = true
+  nullable    = false
+}
+
+variable "allow_other_rule_triggers" {
+  description = "Whether work created by another Automation rule may trigger this rule"
+  type        = bool
+  default     = false
   nullable    = false
 }
 
@@ -76,4 +97,24 @@ variable "send_notifications" {
   type        = bool
   default     = false
   nullable    = false
+}
+
+variable "incident" {
+  description = "Incident fields set by the create_incident_rca recipe"
+  type = object({
+    labels = list(string)
+  })
+  default  = null
+  nullable = true
+}
+
+variable "rca" {
+  description = "RCA Task fields used by the create_incident_rca recipe"
+  type = object({
+    summary     = string
+    description = string
+    label       = string
+  })
+  default  = null
+  nullable = true
 }

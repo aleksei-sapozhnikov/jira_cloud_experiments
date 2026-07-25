@@ -1,8 +1,8 @@
 const [action, encodedConfiguration] = process.argv.slice(2);
 
-if (!["upsert", "delete"].includes(action) || !encodedConfiguration) {
+if (!["upsert", "delete", "inspect"].includes(action) || !encodedConfiguration) {
   throw new Error(
-    "Usage: reconcile-jira-automation.mjs <upsert|delete> <base64-configuration>",
+    "Usage: reconcile-jira-automation.mjs <upsert|delete|inspect> <base64-configuration>",
   );
 }
 
@@ -30,7 +30,7 @@ async function request(url, options = {}) {
     headers: {
       Accept: "application/json",
       Authorization: authorization,
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      "Content-Type": "application/json",
       ...options.headers,
     },
   });
@@ -116,7 +116,7 @@ async function upsert() {
     name: configuration.name,
     state: configuration.enabled ? "ENABLED" : "DISABLED",
     description: configuration.marker,
-    canOtherRuleTrigger: false,
+    canOtherRuleTrigger: configuration.allow_other_rule_triggers,
     notifyOnError: "FIRSTERROR",
     authorAccountId: accountId,
     actor: {
@@ -168,4 +168,22 @@ async function remove() {
   console.log(`Deleted Jira Automation rule ${configuration.marker}.`);
 }
 
-await (action === "upsert" ? upsert() : remove());
+async function inspect() {
+  const existing = await findRule(configuration.marker);
+  if (!existing) {
+    throw new Error(`Jira Automation rule ${configuration.marker} was not found.`);
+  }
+
+  const current = await request(
+    `${automationBaseUrl}/rule/${existing.uuid}?redactSensitiveFields=true`,
+  );
+  console.log(JSON.stringify(current.rule.components, null, 2));
+}
+
+await (
+  action === "upsert"
+    ? upsert()
+    : action === "delete"
+      ? remove()
+      : inspect()
+);

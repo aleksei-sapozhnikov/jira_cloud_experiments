@@ -4,11 +4,14 @@ A collection of independent, reproducible experiments with Jira Cloud administra
 
 The examples share one Incident/RCA scenario, but they do not have to be deployed together. Each section starts with the result and links to a focused reproduction guide.
 
+> **Start here:** [read the two-minute Incident/RCA overview](DEMO.md) before
+> opening the implementation and reproduction guides below.
+
 ## Results at a glance
 
 | Experiment | Result | What it demonstrates | Reproduction guide |
 | --- | --- | --- | --- |
-| [Jira configuration with Terraform](#terraform-jira-configuration-as-code) | Creates spaces, a portal form, reusable schemes, and an Automation rule that creates linked Incidents. A second demonstration plan is clean. | Terraform modules, JSON-driven configuration, REST resource lifecycle, stable identities, and idempotent reconciliation. | [`terraform/README.md`](terraform/README.md) |
+| [Jira configuration with Terraform](#terraform-jira-configuration-as-code) | Creates spaces, a portal form, reusable schemes, and two linked Incident/RCA Automation flows. A second demonstration plan is clean. | Terraform modules, JSON-driven configuration, REST resource lifecycle, stable identities, and idempotent reconciliation. | [`terraform/README.md`](terraform/README.md) |
 | [Incident / RCA Forge app](#forge-incident--rca-status) | Adds an Incident context panel with **RCA missing**, **RCA incomplete**, or **RCA completed** status. | Forge UI Kit, `issueContext`, Jira REST access, dynamic properties, and minimal scopes. | [`custom-apps/incident-rca-status/README.md`](custom-apps/incident-rca-status/README.md) |
 | [Signed Jira webhook on AWS](#aws-lambda-signed-jira-webhook) | Turns a newly created `URGENT` Bug into a linked Incident and ignores duplicate deliveries. | HMAC validation, Atlassian OAuth, Lambda Function URLs, DynamoDB idempotency, and Jira REST writes. | [`webhook/webhook-receiver-aws-lambda/README.md`](webhook/webhook-receiver-aws-lambda/README.md) |
 | [ScriptRunner Cloud examples](#scriptrunner-cloud-examples) | Creates Incidents for urgent Stories, reconciles an `rca-missing` label, and protects Incident closing transitions. | Listeners, Scheduled Jobs, Script Manager code, Jira expressions, restrictions, and validators. | [`scriptrunner/README.md`](scriptrunner/README.md) |
@@ -26,15 +29,15 @@ The Terraform experiment finishes with a stable follow-up plan:
 No changes. Your infrastructure matches the configuration.
 ```
 
-The automation examples form this optional end-to-end scenario:
+The automation examples form this end-to-end scenario:
 
 ```text
-URGENT Bug   ── signed webhook + AWS Lambda ──┐
-                                              ├──> Incident ── Jira Automation ──> RCA Task [rca]
-URGENT Story ── ScriptRunner listener ─────────┘        │
-                                                       ├── Forge displays RCA status
-                                                       ├── Scheduled Job reconciles rca-missing
-                                                       └── workflow rule protects closing
+JSM Form ──> Service request ── Jira Automation ──┐
+URGENT Bug ── signed webhook + AWS Lambda ────────┼──> Incident ── Jira Automation ──> RCA Task [rca]
+URGENT Story ── ScriptRunner listener ────────────┘        │
+                                                          ├── Forge displays RCA status
+                                                          ├── Scheduled Job reconciles rca-missing
+                                                          └── workflow validators protect completion
 ```
 
 Both Jira Automation flows are managed by Terraform: the JSM intake flow creates
@@ -47,7 +50,7 @@ processing label and creates the linked RCA Task.
 - **Two reconciliation strategies.** `on_terraform_change` produces a clean portfolio demonstration; `always` places reconciliation in every plan so applied plans repair supported drift.
 - **Native Jira extension with Forge.** A read-only UI Kit app adds operational context without a separate frontend hosting stack.
 - **Safe webhook processing.** The Lambda receiver verifies the raw-body HMAC signature before processing and uses a conditional DynamoDB write for delivery idempotency.
-- **Automation boundaries.** ScriptRunner creates or checks relationships, Jira Automation owns RCA creation, and inconsistent states remain visible instead of being guessed away.
+- **Automation boundaries.** Terraform manages the Automation definitions, Jira Automation owns RCA creation, ScriptRunner enforces policy and reconciliation, and inconsistent states remain visible instead of being guessed away.
 - **Portable tooling.** Docker and Podman use the same image definition, while optional Windows wrappers select an available runtime automatically.
 
 ## Repository layout
@@ -310,7 +313,9 @@ See [`scriptrunner/README.md`](scriptrunner/README.md) for assumptions and links
 - This is a demonstration and learning repository, not a ready-made production platform.
 - Terraform does not provision the AWS webhook infrastructure.
 - ScriptRunner and Jira workflow configuration are copied manually from version-controlled source.
-- The separate Jira Automation rule that creates RCA Tasks is referenced but not exported here.
+- Terraform manages both demonstrated Jira Automation flows through an
+  idempotent REST adapter; ScriptRunner and Jira workflow rules still require
+  deliberate manual installation from the version-controlled source.
 - Team-managed spaces do not support the same shared-scheme model as company-managed spaces.
 - The workflow-scheme association used by the Terraform example is intended for an empty company-managed space.
 - The Forge `app.id` identifies one registered application; another developer account needs its own registered app identity.

@@ -31,11 +31,23 @@ JSM portal Form -> Service request -> Jira Software Incident -> RCA Task
 
 Terraform creates the **Terraform Incident Report** form and publishes it to the
 customer portal of a team-managed Jira Service Management project (`TFJSM`).
-When a user submits the form, Jira Automation creates a linked `Incident` in a
-company-managed Jira Software project (`TFCLS`). A second Automation flow labels
-the Incident and creates its linked RCA Task. Terraform also manages the
-projects, reusable schemes, and both Automation flows.
+The form captures structured incident context in a service request. Jira
+Automation then creates and links an `Incident` in a company-managed Jira
+Software project (`TFCLS`), and a second flow labels that Incident and creates
+its linked RCA Task. Terraform also manages the projects, reusable schemes, and
+both Automation flows. The recording follows one report from the published
+portal form to all three linked work items.
 [See the Terraform design and configuration.](terraform/README.md)
+
+<details>
+  <summary><strong>▶ Watch: a service request creates an Incident and RCA Task</strong></summary>
+  <br />
+  <img
+    src="assets/demos/service-request-intake.gif"
+    width="960"
+    alt="A submitted service request creates a linked Incident and RCA Task"
+  />
+</details>
 
 ---
 

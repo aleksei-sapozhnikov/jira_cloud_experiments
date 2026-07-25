@@ -3,6 +3,9 @@ FROM node:24-slim
 ARG TERRAFORM_VERSION=1.15.7
 ARG FORGE_CLI_VERSION=13.2.0
 
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \

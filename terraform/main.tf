@@ -175,12 +175,6 @@ module "jira_form" {
   }
 }
 
-data "atlassian_jira_project" "automation_target" {
-  for_each = local.automations
-
-  key = each.value.target.space_key
-}
-
 data "atlassian_jira_issue_types" "automation_source" {
   for_each = local.automations
 
@@ -190,7 +184,7 @@ data "atlassian_jira_issue_types" "automation_source" {
 data "atlassian_jira_issue_types" "automation_target" {
   for_each = local.automations
 
-  project_id = data.atlassian_jira_project.automation_target[each.key].id
+  project_id = module.jira_space[each.value.target.space].id
 }
 
 data "restapi_object" "automation_link_type" {
@@ -241,9 +235,14 @@ module "jira_automation" {
 
   for_each = local.automations
 
-  automation_key    = each.key
-  name              = each.value.name
-  enabled           = try(each.value.enabled, true)
+  automation_key = each.key
+  kind           = try(each.value.kind, "create_linked_work_item")
+  name           = each.value.name
+  enabled        = try(each.value.enabled, true)
+  allow_other_rule_triggers = try(
+    each.value.allow_other_rule_triggers,
+    false
+  )
   cloud_id          = var.jira_cloud_id
   source_project_id = module.jira_space[each.value.source.space].id
   source_issue_type = {
@@ -251,8 +250,8 @@ module "jira_automation" {
     name = each.value.source.issue_type
   }
   target_project = {
-    id  = data.atlassian_jira_project.automation_target[each.key].id
-    key = each.value.target.space_key
+    id  = module.jira_space[each.value.target.space].id
+    key = module.jira_space[each.value.target.space].key
   }
   target_issue_type = {
     id   = local.automation_target_issue_type_ids[each.key]
@@ -263,6 +262,10 @@ module "jira_automation" {
     name      = each.value.link.type
     direction = each.value.link.direction
   }
+  incident = try({
+    labels = each.value.incident.labels
+  }, null)
+  rca                = try(each.value.rca, null)
   send_notifications = try(each.value.send_notifications, false)
 }
 

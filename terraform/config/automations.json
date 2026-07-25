@@ -1,18 +1,48 @@
 {
-  "jsm-incident-to-compkanban": {
-    "name": "Terraform: create a COMPKANBAN incident from a service request",
+  "jsm-incident-to-terraform-classic": {
+    "kind": "create_linked_work_item",
+    "name": "Terraform: create a TFCLS incident from a service request",
     "enabled": true,
     "source": {
       "space": "terraform-jsm",
       "issue_type": "Report an incident"
     },
     "target": {
-      "space_key": "COMPKANBAN",
+      "space": "terraform-classic",
       "issue_type": "Incident"
     },
     "link": {
       "type": "Relates",
       "direction": "inward"
+    },
+    "send_notifications": false
+  },
+  "terraform-classic-incident-rca": {
+    "kind": "create_incident_rca",
+    "name": "Terraform: initialize TFCLS incident RCA",
+    "enabled": true,
+    "allow_other_rule_triggers": true,
+    "source": {
+      "space": "terraform-classic",
+      "issue_type": "Incident"
+    },
+    "target": {
+      "space": "terraform-classic",
+      "issue_type": "Task"
+    },
+    "link": {
+      "type": "Relates",
+      "direction": "inward"
+    },
+    "incident": {
+      "labels": [
+        "automation-processed"
+      ]
+    },
+    "rca": {
+      "summary": "RCA: {{triggerIssue.summary}}",
+      "description": "Root-cause analysis for {{triggerIssue.key}}, created by Terraform-managed Jira Automation.",
+      "label": "rca"
     },
     "send_notifications": false
   }

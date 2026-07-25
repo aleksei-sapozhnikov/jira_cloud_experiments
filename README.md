@@ -47,7 +47,7 @@ portal form to all three linked work items.
   <br />
   <img
     src="assets/demos/service-request-intake.gif"
-    width="960"
+    height="648"
     alt="A submitted service request creates a linked Incident and RCA Task"
   />
 </details>
@@ -78,7 +78,7 @@ second Incident marked `rca-missing` being rejected by the workflow validator.
   <br />
   <img
     src="assets/demos/workflow-enforcement-and-rca-status.gif"
-    width="960"
+    height="648"
     alt="The RCA indicator changes state and a workflow validator blocks an invalid transition"
   />
 </details>
@@ -99,7 +99,7 @@ and [signed webhook receiver](webhook/webhook-receiver-aws-lambda/README.md).
   <br />
   <img
     src="assets/demos/additional-incident-sources.gif"
-    width="960"
+    height="648"
     alt="An urgent Story and an urgent Bug each create a linked Incident"
   />
 </details>
@@ -125,7 +125,7 @@ Development panel in Jira.
   <br />
   <img
     src="assets/demos/github-integration.gif"
-    width="960"
+    height="648"
     alt="Jira associates a GitHub branch and pull request through a shared work item key"
   />
 </details>

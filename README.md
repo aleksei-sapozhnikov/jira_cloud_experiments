@@ -113,6 +113,20 @@ requests for [Terraform configuration](https://github.com/aleksei-sapozhnikov/ji
 [Incident/RCA integrations](https://github.com/aleksei-sapozhnikov/jira_cloud_experiments/pull/2),
 and the [combined portfolio](https://github.com/aleksei-sapozhnikov/jira_cloud_experiments/pull/3).
 
+The recording starts with the connected repository, then follows a Jira work
+item key to its matching GitHub branch and pull request and back to the populated
+Development panel in Jira.
+
+<details>
+  <summary><strong>▶ Watch: Jira associates GitHub development activity</strong></summary>
+  <br />
+  <img
+    src="assets/demos/github-integration.gif"
+    width="960"
+    alt="Jira associates a GitHub branch and pull request through a shared work item key"
+  />
+</details>
+
 ---
 
 ### Implementation notes

@@ -93,9 +93,10 @@ does not already exist, providing an entry point outside Jira Automation.
 
 ### Incident creation via AWS Lambda
 
-A signed AWS Lambda webhook creates a linked Incident for an urgent Bug, with
-HMAC validation and DynamoDB idempotency. Both entry points feed the resulting
-Incident into the same RCA workflow.
+A signed AWS Lambda webhook creates a linked Incident for an urgent Bug,
+validating the webhook's hash-based message authentication code (HMAC)
+signature and using DynamoDB for idempotency. Both entry points feed the
+resulting Incident into the same RCA workflow.
 [See the signed webhook receiver.](webhook/webhook-receiver-aws-lambda/README.md)
 
 <details>

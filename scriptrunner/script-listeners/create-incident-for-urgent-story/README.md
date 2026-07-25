@@ -32,7 +32,7 @@ The listener does **not** create an RCA Task. RCA creation and the Incident/RCA 
 1. Install `scriptmanager/incident/IncidentRcaService.groovy` in Script Manager as described in [`../../scriptmanager/README.md`](../../scriptmanager/README.md).
 2. Navigate to **ScriptRunner → Script Listeners**.
 3. Create a listener for the **Work Item Created** event.
-4. Select the demo space or spaces.
+4. Select `TFCLS`.
 5. Copy `condition.js` into the condition field.
 6. Copy `script.groovy` into the code field.
 7. Run it as a user allowed to create, edit, and link work items.

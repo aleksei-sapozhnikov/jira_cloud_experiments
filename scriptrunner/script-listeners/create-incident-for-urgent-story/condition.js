@@ -3,4 +3,4 @@
 
 issue.issueType.name == "Story" &&
     issue.summary != null &&
-    issue.summary.trim().toLowerCase().startsWith("urgent")
+    issue.summary.trim().toLowerCase().indexOf("urgent") == 0

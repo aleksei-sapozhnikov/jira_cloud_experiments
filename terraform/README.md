@@ -1,6 +1,6 @@
 # Jira configuration with Terraform
 
-[← Back to the portfolio overview](../README.md#terraform-jira-configuration-as-code)
+[Two-minute overview](../DEMO.md) · [Portfolio overview](../README.md#terraform-jira-configuration-as-code)
 
 This directory contains the Terraform part of the Jira Cloud demonstration. It creates Jira spaces and reusable configuration profiles, associates the generated schemes with company-managed spaces, publishes a JSM portal form, and manages the Incident/RCA Jira Automation flows.
 
@@ -58,7 +58,7 @@ The current configuration demonstrates:
 - optional permission schemes where the Jira plan supports them;
 - project-to-scheme associations for company-managed spaces;
 - Jira form templates with a normal Terraform CRUD lifecycle;
-- cross-space Jira Automation rules.
+- the cross-space intake flow and the Incident/RCA initialization flow.
 
 ## Directory structure
 

@@ -25,7 +25,8 @@ For a matching Story, `script.groovy` delegates to `incident.IncidentRcaService`
 2. links the Story and Incident with `Relates`;
 3. adds a description to a newly created Incident with a link back to the Story.
 
-The listener does **not** create an RCA Task. RCA creation and the Incident/RCA link belong to the separate Jira Automation rule.
+The listener does **not** create an RCA Task. RCA creation and the Incident/RCA
+link belong to the Terraform-managed Incident initialization flow.
 
 ## Configure in ScriptRunner
 
@@ -45,4 +46,6 @@ Creating a Story such as `URGENT: payment export fails` creates or reuses:
 - an Incident with the same summary;
 - a `Relates` link between the Story and Incident.
 
-With Jira Automation disabled, no RCA Task is created by this listener. With the separate Automation rule enabled, the new Incident can then trigger creation of its linked RCA Task.
+With Jira Automation disabled, no RCA Task is created by this listener. With
+the Terraform-managed initialization flow enabled, the new Incident triggers
+creation of its linked RCA Task.

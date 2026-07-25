@@ -7,7 +7,9 @@ It provides two separate behaviors:
 - `ensureIncidentForUrgentStory` creates or reuses an Incident and links it to the urgent Story;
 - `reconcileMissingRcaLabel` adds or removes `rca-missing` according to whether the Incident has a linked RCA Task.
 
-The service deliberately does not create RCA Tasks. RCA creation belongs to Jira Automation, while an absent link is treated as an inconsistent state that requires manual investigation.
+The service deliberately does not create RCA Tasks. RCA creation belongs to the
+Terraform-managed Jira Automation flow, while an absent link is treated as an
+inconsistent state that requires investigation.
 
 The class uses Jira names instead of environment-specific numeric IDs.
 

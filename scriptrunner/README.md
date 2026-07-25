@@ -1,6 +1,6 @@
 # ScriptRunner for Jira Cloud examples
 
-[← Back to the portfolio overview](../README.md#scriptrunner-cloud-examples)
+[Two-minute overview](../DEMO.md) · [Portfolio overview](../README.md#scriptrunner-cloud-examples)
 
 This directory contains ScriptRunner source used by the Incident/RCA demonstration. The examples cover an event-driven Script Listener, a daily Scheduled Job, reusable Script Manager code, a workflow restriction, and workflow validators.
 
@@ -14,7 +14,9 @@ With the selected examples configured for `TFCLS`:
 - a daily job adds `rca-missing` to open Incidents without a linked RCA and removes the stale label after a link appears;
 - an Incident closing transition is either hidden or rejected while required RCA work is missing or incomplete.
 
-The listener and Scheduled Job deliberately do not create RCA Tasks. RCA creation belongs to a separate Jira Automation rule, while these examples keep missing or inconsistent relationships visible.
+The listener and Scheduled Job deliberately do not create RCA Tasks. RCA
+creation belongs to the Terraform-managed Incident initialization flow, while
+these examples keep missing or inconsistent relationships visible.
 
 For a quick demonstration, enable the listener and create a Story such as `URGENT: payment export fails`. The expected result is an Incident with the same summary and a `Relates` link back to the Story.
 

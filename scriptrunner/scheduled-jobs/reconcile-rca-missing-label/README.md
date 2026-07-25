@@ -9,8 +9,8 @@ Configure the job to run once per day at **12:00 UTC**.
 The scope is defined by `INCIDENT_JQL` at the top of `script.groovy`:
 
 ```jql
-    project = "TFCLS"
-    AND issuetype = "Incident"
+project = "TFCLS"
+AND issuetype = "Incident"
 AND statusCategory != Done
 ```
 

@@ -1,6 +1,6 @@
 # Jira webhook receiver on AWS Lambda
 
-[← Back to the portfolio overview](../../README.md#aws-lambda-signed-jira-webhook)
+[Two-minute overview](../../DEMO.md) · [Portfolio overview](../../README.md#aws-lambda-signed-jira-webhook)
 
 This directory contains a small AWS Lambda webhook receiver used by the Jira Cloud demonstration.
 

@@ -118,7 +118,7 @@ The panel is configured for the `Incident` work type in `TFCLS`. On a matching I
 - display their keys, summaries, links, and current status;
 - show an explanatory state when no RCA item is found or the data cannot be resolved.
 
-A quick successful check does not require a completed RCA workflow. If the panel appears and shows **RCA missing**, the app is installed, rendered, and able to inspect the Incident.
+A quick successful check does not require a completed RCA process. If the panel appears and shows **RCA missing**, the app is installed, rendered, and able to inspect the Incident.
 
 The app exposes the same status in two forms:
 

@@ -8,9 +8,9 @@ root-cause analysis (RCA) process but can also be reviewed independently.
 [See the complete portfolio overview and reproduction paths.](OVERVIEW.md)
 
 This is a portfolio demonstration rather than a proposed production
-architecture. One small workflow connects several Jira extension approaches so
-their responsibilities and trade-offs can be compared, while every experiment
-remains independently reviewable.
+architecture. One small Incident/RCA process connects several Jira extension
+approaches so their responsibilities and trade-offs can be compared, while
+every experiment remains independently reviewable.
 [Compare the experiments and their results.](OVERVIEW.md#results-at-a-glance)
 
 **▶ Watch:** blocks expand to short edited screen recordings of the processes
@@ -18,7 +18,7 @@ described in their sections.
 
 ---
 
-### Incident/RCA workflow
+### Incident/RCA process
 
 ```mermaid
 flowchart LR
@@ -104,7 +104,7 @@ does not already exist, providing an entry point outside Jira Automation.
 A signed AWS Lambda webhook creates a linked Incident for an urgent Bug,
 validating the webhook's hash-based message authentication code (HMAC)
 signature and using DynamoDB for idempotency. Both entry points feed the
-resulting Incident into the same RCA workflow.
+resulting Incident into the same RCA process.
 [See the signed webhook receiver.](webhook/webhook-receiver-aws-lambda/README.md)
 
 <details>

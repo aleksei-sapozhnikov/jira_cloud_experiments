@@ -105,6 +105,19 @@ resource "atlassian_jira_workflow" "this" {
   name        = var.profile.workflow.name
   description = try(var.profile.workflow.description, null)
 
+  /*
+   * Jira returns transition extensions installed by apps such as ScriptRunner
+   * inside the same transition blocks that the provider manages. Reconciling
+   * those blocks would remove rules that this provider cannot declare and can
+   * also misidentify transitions when Jira returns them in another order.
+   *
+   * Terraform still creates transitions for a new workflow. Existing
+   * transitions and their app-owned rules are preserved after that.
+   */
+  lifecycle {
+    ignore_changes = [transition]
+  }
+
   dynamic "status" {
     for_each = local.workflow_statuses
 

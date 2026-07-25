@@ -204,7 +204,7 @@ Create or edit a Jira Cloud webhook with:
 - URL: the Lambda Function URL;
 - event: work item or issue created;
 - secret token: exactly the same value as `JIRA_WEBHOOK_SECRET`;
-- optional JQL filter: restrict deliveries to the configured Bug type to reduce unnecessary invocations.
+- optional JQL filter: `project = TFCLS AND issuetype = Bug`.
 
 The Lambda function still performs its own checks, even when the Jira webhook has a JQL filter.
 

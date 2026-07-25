@@ -11,7 +11,7 @@ This is a portfolio demonstration rather than a proposed production
 architecture. One small workflow connects several Jira extension approaches so
 their responsibilities and trade-offs can be compared, while every experiment
 remains independently reviewable.
-[Compare the experiments and their prerequisites.](OVERVIEW.md#choose-what-to-reproduce)
+[Compare the experiments and their results.](OVERVIEW.md#results-at-a-glance)
 
 **▶ Watch:** blocks expand to short edited screen recordings of the processes
 described in their sections.

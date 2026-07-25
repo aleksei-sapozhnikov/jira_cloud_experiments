@@ -69,20 +69,6 @@ processing label and creates the linked RCA Task.
 └── jira-cloud-iac-dev.env.example
 ```
 
-## Choose what to reproduce
-
-The experiments have different prerequisites and can be evaluated independently:
-
-| Experiment | Jira access | Additional prerequisites | Deployment model |
-| --- | --- | --- | --- |
-| Terraform | Jira administrator and API token | Docker or Podman | Automated by Terraform, including a REST-backed Forms resource |
-| Forge app | Permission to deploy and install Forge apps | Docker or Podman; Forge credentials | Forge CLI |
-| AWS webhook | Permission to create and link work items | AWS account; Atlassian OAuth client | Source is included; AWS resources are configured manually |
-| ScriptRunner | ScriptRunner for Jira Cloud | Permission to edit the selected workflows | Source is included; configuration is copied into the Jira and ScriptRunner editors |
-| Development image | None for the toolchain check | Docker or Podman | Local container |
-
-For the shortest visual demonstration, deploy the Forge app and open an Incident. For the clearest configuration-as-code demonstration, apply Terraform and show the clean second plan.
-
 ## Shared development environment
 
 The root container is used by the Terraform and Forge experiments and by the Jira identifier helper. The AWS and ScriptRunner examples can be reviewed or configured independently.

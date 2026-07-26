@@ -114,6 +114,16 @@ data "atlassian_jira_issue_types" "form_project" {
   project_id = module.jira_space[each.value.space].id
 }
 
+data "atlassian_jira_issue_types" "workflow_resolution" {
+  for_each = {
+    for space_name, space in local.spaces :
+    space_name => space
+    if space.management == "company"
+  }
+
+  project_id = module.jira_space[each.key].id
+}
+
 data "restapi_object" "form_service_desk" {
   provider = restapi.jira
   for_each = local.forms
@@ -347,4 +357,33 @@ module "jira_profile_assignment" {
 
   profile_key         = each.value.configuration_profile
   reconciliation_mode = var.jira_profile_reconciliation_mode
+}
+
+module "jira_workflow_resolution" {
+  source = "./modules/jira-workflow-resolution"
+
+  for_each = {
+    for space_name, space in local.spaces :
+    space_name => space
+    if space.management == "company"
+  }
+
+  project = {
+    id         = module.jira_space[each.key].id
+    key        = module.jira_space[each.key].key
+    management = each.value.management
+  }
+
+  issue_type_ids = toset([
+    for issue_type
+    in data.atlassian_jira_issue_types.workflow_resolution[each.key].issue_types :
+    issue_type.id
+  ])
+
+  resolution_name     = var.jira_done_resolution_name
+  reconciliation_mode = var.jira_workflow_reconciliation_mode
+
+  depends_on = [
+    module.jira_profile_assignment
+  ]
 }

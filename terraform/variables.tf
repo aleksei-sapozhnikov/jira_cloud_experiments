@@ -13,6 +13,33 @@ variable "jira_profile_reconciliation_mode" {
   }
 }
 
+variable "jira_workflow_reconciliation_mode" {
+  description = "Controls when Jira workflow Resolution actions are reconciled"
+  type        = string
+  default     = "on_terraform_change"
+
+  validation {
+    condition = contains(
+      ["on_terraform_change", "always"],
+      var.jira_workflow_reconciliation_mode
+    )
+
+    error_message = "jira_workflow_reconciliation_mode must be on_terraform_change or always."
+  }
+}
+
+variable "jira_done_resolution_name" {
+  description = "Resolution assigned by Jira workflow transitions into Done"
+  type        = string
+  default     = "Done"
+  nullable    = false
+
+  validation {
+    condition     = length(trimspace(var.jira_done_resolution_name)) > 0
+    error_message = "jira_done_resolution_name must not be empty."
+  }
+}
+
 variable "jira_project_lead_account_id" {
   description = "Jira account ID assigned as the lead of spaces created by Terraform"
   type        = string

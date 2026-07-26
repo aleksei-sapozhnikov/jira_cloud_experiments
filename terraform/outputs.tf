@@ -81,6 +81,20 @@ output "jira_profile_reconciliation_mode" {
   value       = var.jira_profile_reconciliation_mode
 }
 
+output "jira_workflow_resolutions" {
+  description = "Desired Resolution actions for workflows used by each Jira space"
+
+  value = {
+    for space_name, workflow in module.jira_workflow_resolution :
+    space_name => workflow.configuration
+  }
+}
+
+output "jira_workflow_reconciliation_mode" {
+  description = "Current Jira workflow Resolution reconciliation mode"
+  value       = var.jira_workflow_reconciliation_mode
+}
+
 output "jira_forms" {
   description = "Jira form templates managed through the Forms REST API"
 

@@ -34,6 +34,7 @@ This is the shortest successful check for the portfolio demonstration. The `alwa
 - [Jira Forms module](#jira-forms-module)
 - [Jira Automation module](#jira-automation-module)
 - [Profile assignment module](#profile-assignment-module)
+- [Workflow Resolution module](#workflow-resolution-module)
 - [Authentication and inputs](#authentication-and-inputs)
 - [Authentication setup for Jira Forms](#authentication-setup-for-jira-forms)
 - [Finding Jira identifiers](#finding-jira-identifiers)
@@ -52,6 +53,7 @@ The current configuration demonstrates:
 - team-managed and company-managed Jira spaces;
 - an explicit project lead supplied at runtime;
 - workflows and workflow schemes;
+- Resolution actions derived from workflow status categories;
 - create, edit, and view screens;
 - screen schemes and issue-type screen schemes;
 - field configurations and field-configuration schemes;
@@ -175,6 +177,48 @@ reconciliation_mode = var.jira_profile_reconciliation_mode
 
 The root variable defaults to `on_terraform_change`. Override it for a run through `TF_VAR_jira_profile_reconciliation_mode`, the `-var` CLI option, or a literal in the module call. No `.tfvars` file is required.
 
+## Workflow Resolution module
+
+`modules/jira-workflow-resolution` discovers every workflow used by the work
+types in a company-managed Jira space. It does not depend on transition or
+status names:
+
+- transitions into a `DONE` status set the configured Resolution;
+- directed transitions from `DONE` to another category clear Resolution;
+- global transitions to a non-Done category also clear Resolution because they
+  can be invoked from Done.
+
+Jira already assigns every status a system category such as `TODO`,
+`IN_PROGRESS`, or `DONE`. The module reads these categories and the transition
+endpoints from Jira's workflow REST API; it does not create or modify the
+categories themselves. Resolution actions are attached to the matching
+transitions rather than to statuses.
+
+The root configuration applies the module to the shared company-managed
+workflow used by `TFCLS`. Its REST helper preserves existing conditions,
+validators, post-functions, transition IDs, and workflow versions. Before an
+update it submits the complete payload to Jira's workflow validation endpoint.
+
+Team-managed `TFJSM` and `TFKAN` workflows are excluded. Jira rejects
+Resolution as an unsupported field in workflow `Update field` rules for this
+type of space. Atlassian's documented alternative is Jira Automation, which is
+kept separate here because it has a different lifecycle and consumes Automation
+executions.
+
+The default Resolution name is `Done`. The root configuration exposes two
+optional variables:
+
+```text
+TF_VAR_jira_done_resolution_name
+TF_VAR_jira_workflow_reconciliation_mode
+```
+
+The reconciliation mode has the same `on_terraform_change` and `always`
+semantics as profile assignment.
+
+[See the module README for the complete category-based reconciliation
+algorithm and lifecycle boundary.](modules/jira-workflow-resolution/README.md)
+
 ## Authentication and inputs
 
 The provider and reconciliation scripts use:
@@ -289,6 +333,8 @@ Expected result after the initial application:
 - `jira_spaces` lists the configured Jira spaces;
 - `jira_configuration_profiles` lists the generated workflow, screen, and field-configuration IDs;
 - `jira_profile_assignments` shows the desired project-to-profile associations;
+- `jira_workflow_resolutions` shows the desired Resolution configuration for
+  each supported company-managed space;
 - `jira_forms` shows the form template ID and owning project;
 - `jira_automations` shows the stable rule identities and enabled states;
 - the subsequent plan reports:
@@ -369,10 +415,16 @@ For the interview demonstration:
   inside those transition blocks, and reconciling the whole block would delete
   rules that the provider cannot declare. Consequently, transition topology
   changes must be migrated deliberately rather than applied by editing the
-  profile JSON.
+  profile JSON. The separate workflow Resolution module updates only native
+  Resolution actions while preserving those rules; it does not own transition
+  topology.
 - Jira Free does not allow creation of custom permission schemes. The supplied profile therefore disables permission-scheme creation.
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.
+- Team-managed spaces reject Resolution in workflow `Update field` rules.
+  Configure it through Jira Automation if an explicit Resolution value is
+  required; the workflow Resolution module intentionally targets only
+  company-managed spaces.
 - Jira's public API does not independently create project-scoped work types inside team-managed spaces. The selected JSM ITSM project template supplies `Report an incident`; Terraform then resolves its ID by name and manages the form publication.
 - One root variable currently supplies the same project lead to every demo space. Add a separate mapping variable only if the demonstration needs different leads per space.
 - The container entrypoint maps Jira credentials and URL to Terraform variables for the generic REST provider; Terraform runs outside the development image must provide those `TF_VAR_*` variables explicitly.

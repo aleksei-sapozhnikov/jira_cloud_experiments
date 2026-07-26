@@ -85,25 +85,18 @@ class IncidentRcaService {
         Map incidentResult = findOrCreateIncident(
             sourceKey,
             sourceSummary,
-            projectKey
+            projectKey,
+            sourceUrl,
+            executionSource
         )
         String incidentKey = incidentResult.key as String
         boolean incidentCreated = incidentResult.created as boolean
 
         /*
-         * Create the source link before updating the description. If a later
-         * operation fails, another run can find and reuse the Incident.
+         * The source identity is part of Incident creation. If linking fails,
+         * the orphaned Incident still points back to the originating Story.
          */
         ensureLink(sourceKey, incidentKey)
-
-        if (incidentCreated) {
-            setIncidentDescription(
-                incidentKey,
-                sourceKey,
-                sourceUrl,
-                executionSource
-            )
-        }
 
         logger.info(
             "${sourceKey}: Incident processing completed; " +
@@ -229,7 +222,9 @@ class IncidentRcaService {
     private Map findOrCreateIncident(
         String sourceKey,
         String sourceSummary,
-        String projectKey
+        String projectKey,
+        String sourceUrl,
+        String executionSource
     ) {
         String existingIncidentJql = """
             project = "${projectKey}"
@@ -255,6 +250,29 @@ class IncidentRcaService {
             INCIDENT_TYPE_NAME
         ) {
             setSummary(incidentSummary)
+            setDescription([
+                type   : "doc",
+                version: 1,
+                content: [[
+                    type   : "paragraph",
+                    content: [
+                        [
+                            type: "text",
+                            text: "Automatically created by " +
+                                "${executionSource} from "
+                        ],
+                        [
+                            type : "text",
+                            text : sourceKey,
+                            marks: [[
+                                type : "link",
+                                attrs: [href: sourceUrl]
+                            ]]
+                        ],
+                        [type: "text", text: "."]
+                    ]
+                ]]
+            ])
         }
 
         String incidentKey = createdIncident.getKey()
@@ -350,50 +368,4 @@ class IncidentRcaService {
         )
     }
 
-    private void setIncidentDescription(
-        String incidentKey,
-        String sourceKey,
-        String sourceUrl,
-        String executionSource
-    ) {
-        def response = putRequest.call("/rest/api/3/issue/${incidentKey}")
-            .header("Accept", "application/json")
-            .header("Content-Type", "application/json")
-            .body([
-                fields: [
-                    description: [
-                        type   : "doc",
-                        version: 1,
-                        content: [[
-                            type   : "paragraph",
-                            content: [
-                                [
-                                    type: "text",
-                                    text: "Automatically created by " +
-                                        "${executionSource} from "
-                                ],
-                                [
-                                    type : "text",
-                                    text : sourceKey,
-                                    marks: [[
-                                        type : "link",
-                                        attrs: [href: sourceUrl]
-                                    ]]
-                                ],
-                                [type: "text", text: "."]
-                            ]
-                        ]]
-                    ]
-                ]
-            ])
-            .asString()
-
-        if (response.status != 204) {
-            throw new IllegalStateException(
-                "${INCIDENT_TYPE_NAME} ${incidentKey} was created and linked, " +
-                "but its description could not be updated. " +
-                "Status: ${response.status}; response: ${response.body}"
-            )
-        }
-    }
 }

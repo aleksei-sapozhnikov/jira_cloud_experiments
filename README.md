@@ -72,9 +72,9 @@ relationships. [See the ScriptRunner rules.](scriptrunner/README.md)
 
 ### RCA status indicator via custom app
 
-A custom Jira app shows **RCA missing**, **RCA incomplete**, or **RCA
-completed** directly on the Incident. The same state remains visible as a
-compact badge when the panel is collapsed.
+A custom Jira app shows **RCA missing**, **RCA incomplete**, **RCA completed**,
+or **RCA unknown** directly on the Incident. The same state remains visible as
+a compact badge when the panel is collapsed.
 [See the custom app implementation.](custom-apps/incident-rca-status/README.md)
 
 The recording connects the UI and policy layers: it shows an incomplete linked

@@ -6,7 +6,7 @@ This directory contains an Atlassian Forge UI Kit app for Jira Cloud. It adds an
 
 ## Result in brief
 
-Installing the app adds a read-only context panel to an Incident. The panel reports **RCA missing**, **RCA incomplete**, or **RCA completed** from linked work items carrying the `rca` label. The same state remains visible as a compact badge when the panel is collapsed.
+Installing the app adds a read-only context panel to an Incident. The panel reports **RCA missing**, **RCA incomplete**, **RCA completed**, or **RCA unknown** from linked work items carrying the `rca` label. The same state remains visible as a compact badge when the panel is collapsed.
 
 ![RCA completed in expanded and collapsed views](../../assets/incident-rca-status/rca-completed.png)
 
@@ -33,6 +33,7 @@ custom-apps/incident-rca-status/
     │   └── dynamic-properties.js
     ├── frontend/index.jsx
     └── shared/
+        ├── jira-error.js
         └── rca-status.js
 ```
 
@@ -41,6 +42,7 @@ Important files:
 - `manifest.yml` registers the Jira issue-context module, runtime, functions, app ID, and Jira scopes.
 - `src/frontend/index.jsx` loads Jira data with `requestJira` and renders the visible panel.
 - `src/backend/dynamic-properties.js` loads Jira data with `api.asApp().requestJira` and builds the compact status shown when the panel is collapsed.
+- `src/shared/jira-error.js` turns Jira REST failures into concise, user-readable messages.
 - `src/shared/rca-status.js` contains the pure RCA classification rules shared by both entry points.
 - `package-lock.json` pins the Node.js dependency tree used by `npm ci`.
 
@@ -142,6 +144,12 @@ A linked RCA work item exists, but it has not reached the Jira **Done** status c
 No linked work item with the `rca` label was found.
 
 ![RCA missing in expanded and collapsed views](../../assets/incident-rca-status/rca-missing.png)
+
+### RCA unknown
+
+Jira did not return enough information to classify every linked work item. The
+expanded panel shows a concise Jira error and suggests refreshing the page or
+contacting a Jira administrator; the collapsed summary displays **RCA unknown**.
 
 Terraform configures the `TFCLS` space and both Automation flows. A submitted
 portal request or another configured Incident source supplies the live work

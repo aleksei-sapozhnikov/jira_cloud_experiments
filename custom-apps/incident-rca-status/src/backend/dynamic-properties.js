@@ -10,6 +10,7 @@ import {
   getLinkedIssueKeys,
   isRcaIssue,
 } from '../shared/rca-status';
+import { createJiraRequestError } from '../shared/jira-error';
 
 const createStatus = (label, type) => ({
   status: {
@@ -32,11 +33,7 @@ const fetchIssue = async (issueKey, fields) => {
   );
 
   if (!response.ok) {
-    const responseBody = await response.text();
-
-    throw new Error(
-      `Failed to load ${issueKey}: HTTP ${response.status}. ${responseBody}`
-    );
+    throw await createJiraRequestError(issueKey, response);
   }
 
   return response.json();
@@ -44,6 +41,8 @@ const fetchIssue = async (issueKey, fields) => {
 
 const createRcaStatus = (rcaStatus, rcaIssueCount) => {
   switch (rcaStatus) {
+    case RCA_STATUS.UNKNOWN:
+      return createStatus('RCA unknown', 'default');
     case RCA_STATUS.MISSING:
       return createStatus('RCA missing', 'removed');
     case RCA_STATUS.MULTIPLE:
@@ -83,8 +82,21 @@ export const handler = async (payload) => {
       .filter((result) => result.status === 'fulfilled')
       .map((result) => result.value);
 
+    const failedResults = results.filter(
+      (result) => result.status === 'rejected'
+    );
+
+    if (failedResults.length > 0) {
+      console.warn(
+        `Could not inspect ${failedResults.length} linked issue(s) for ${issueKey}`,
+        failedResults.map((result) => result.reason)
+      );
+    }
+
     const rcaIssues = linkedIssues.filter(isRcaIssue);
-    const rcaStatus = calculateRcaStatus(rcaIssues);
+    const rcaStatus = calculateRcaStatus(rcaIssues, {
+      isDataComplete: failedResults.length === 0,
+    });
 
     return createRcaStatus(rcaStatus, rcaIssues.length);
   } catch (error) {

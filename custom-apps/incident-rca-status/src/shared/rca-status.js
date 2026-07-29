@@ -7,6 +7,7 @@
 const RCA_LABEL = 'rca';
 
 export const RCA_STATUS = Object.freeze({
+  UNKNOWN: 'unknown',
   MISSING: 'missing',
   MULTIPLE: 'multiple',
   INCOMPLETE: 'incomplete',
@@ -41,7 +42,16 @@ export const isCompleted = (issue) =>
  * Classifies the RCA state without coupling the result to a UI component or
  * dynamic-properties response shape.
  */
-export const calculateRcaStatus = (rcaIssues) => {
+export const calculateRcaStatus = (
+  rcaIssues,
+  { isDataComplete = true } = {}
+) => {
+  // A failed linked-issue request could hide an RCA task, so no definitive
+  // classification is safe until every linked issue has been inspected.
+  if (!isDataComplete) {
+    return RCA_STATUS.UNKNOWN;
+  }
+
   if (rcaIssues.length === 0) {
     return RCA_STATUS.MISSING;
   }

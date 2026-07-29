@@ -31,15 +31,15 @@ custom-apps/incident-rca-status/
 └── src/
     ├── dynamic-properties.js
     ├── frontend/index.jsx
-    ├── index.js
-    └── resolvers/index.js
+    └── rca-status.js
 ```
 
 Important files:
 
 - `manifest.yml` registers the Jira issue-context module, runtime, functions, app ID, and Jira scopes.
-- `src/frontend/index.jsx` renders the visible panel.
-- `src/dynamic-properties.js` calculates the compact status shown when the panel is collapsed.
+- `src/frontend/index.jsx` loads Jira data with `requestJira` and renders the visible panel.
+- `src/dynamic-properties.js` loads Jira data with `api.asApp().requestJira` and builds the compact status shown when the panel is collapsed.
+- `src/rca-status.js` contains the pure RCA classification rules shared by both entry points.
 - `package-lock.json` pins the Node.js dependency tree used by `npm ci`.
 
 ## Prerequisites

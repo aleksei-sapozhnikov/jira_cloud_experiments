@@ -1,7 +1,7 @@
 modules:
   jira:issueContext:
     - key: incident-rca-status-context
-      resource: main
+      resource: incident-rca-panel
       render: native
       title: Status
       label: Incident / RCA
@@ -11,16 +11,16 @@ modules:
           label: RCA status
           type: default
       dynamicProperties:
-        function: dynamic-properties
+        function: incident-rca-properties
       displayConditions:
         and:
           issueType: Incident
           projectKey: TFCLS
   function:
-    - key: dynamic-properties
+    - key: incident-rca-properties
       handler: dynamic-properties.handler
 resources:
-  - key: main
+  - key: incident-rca-panel
     path: src/frontend/index.jsx
 app:
   runtime:

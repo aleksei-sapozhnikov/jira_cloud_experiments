@@ -12,8 +12,12 @@ import ForgeReconciler, {
   useProductContext,
 } from '@forge/react';
 import { requestJira } from '@forge/bridge';
-
-const RCA_LABEL = 'rca';
+import {
+  RCA_STATUS,
+  calculateRcaStatus,
+  getLinkedIssueKeys,
+  isRcaIssue,
+} from '../rca-status';
 
 const fetchIssue = async (issueKey, fields) => {
   const fieldsParameter = encodeURIComponent(fields.join(','));
@@ -40,54 +44,35 @@ const fetchIssue = async (issueKey, fields) => {
   return response.json();
 };
 
-const getLinkedIssueKeys = (issueLinks = []) => {
-  const keys = issueLinks
-    .map(
-      (link) =>
-        link.outwardIssue?.key ??
-        link.inwardIssue?.key
-    )
-    .filter(Boolean);
-
-  return [...new Set(keys)];
-};
-
-const isRcaIssue = (issue) =>
-  (issue.fields.labels ?? []).includes(RCA_LABEL);
-
-const isCompleted = (issue) =>
-  issue.fields.status?.statusCategory?.key === 'done';
-
-const calculateHealth = (rcaIssues) => {
-  if (rcaIssues.length === 0) {
-    return {
-      title: 'RCA missing',
-      appearance: 'error',
-      message: 'No linked issue with the rca label was found.',
-    };
+const getHealth = (rcaStatus, rcaIssueCount) => {
+  switch (rcaStatus) {
+    case RCA_STATUS.MISSING:
+      return {
+        title: 'RCA missing',
+        appearance: 'error',
+        message: 'No linked issue with the rca label was found.',
+      };
+    case RCA_STATUS.MULTIPLE:
+      return {
+        title: 'Multiple RCA tasks found',
+        appearance: 'warning',
+        message: `${rcaIssueCount} linked RCA tasks were found.`,
+      };
+    case RCA_STATUS.INCOMPLETE:
+      return {
+        title: 'RCA incomplete',
+        appearance: 'warning',
+        message: 'The linked RCA task has not reached Done.',
+      };
+    case RCA_STATUS.COMPLETED:
+      return {
+        title: 'RCA completed',
+        appearance: 'success',
+        message: 'The linked RCA task is completed.',
+      };
+    default:
+      throw new Error(`Unsupported RCA status: ${rcaStatus}`);
   }
-
-  if (rcaIssues.length > 1) {
-    return {
-      title: 'Multiple RCA tasks found',
-      appearance: 'warning',
-      message: `${rcaIssues.length} linked RCA tasks were found.`,
-    };
-  }
-
-  if (!isCompleted(rcaIssues[0])) {
-    return {
-      title: 'RCA incomplete',
-      appearance: 'warning',
-      message: 'The linked RCA task has not reached Done.',
-    };
-  }
-
-  return {
-    title: 'RCA completed',
-    appearance: 'success',
-    message: 'The linked RCA task is completed.',
-  };
 };
 
 const App = () => {
@@ -140,9 +125,11 @@ const App = () => {
           );
 
         if (!cancelled) {
+          const rcaStatus = calculateRcaStatus(rcaIssues);
+
           setData({
             rcaIssues,
-            health: calculateHealth(rcaIssues),
+            health: getHealth(rcaStatus, rcaIssues.length),
           });
         }
       } catch (loadError) {

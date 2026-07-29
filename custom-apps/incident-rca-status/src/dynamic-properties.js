@@ -4,8 +4,12 @@
  */
 
 import api, { route } from '@forge/api';
-
-const RCA_LABEL = 'rca';
+import {
+  RCA_STATUS,
+  calculateRcaStatus,
+  getLinkedIssueKeys,
+  isRcaIssue,
+} from './rca-status';
 
 const createStatus = (label, type) => ({
   status: {
@@ -38,19 +42,20 @@ const fetchIssue = async (issueKey, fields) => {
   return response.json();
 };
 
-const getLinkedIssueKeys = (issueLinks = []) => {
-  const keys = issueLinks
-    .map((link) => link.outwardIssue?.key ?? link.inwardIssue?.key)
-    .filter(Boolean);
-
-  return [...new Set(keys)];
+const createRcaStatus = (rcaStatus, rcaIssueCount) => {
+  switch (rcaStatus) {
+    case RCA_STATUS.MISSING:
+      return createStatus('RCA missing', 'removed');
+    case RCA_STATUS.MULTIPLE:
+      return createStatus(`Multiple RCA: ${rcaIssueCount}`, 'moved');
+    case RCA_STATUS.INCOMPLETE:
+      return createStatus('RCA incomplete', 'inprogress');
+    case RCA_STATUS.COMPLETED:
+      return createStatus('RCA completed', 'success');
+    default:
+      return createStatus('RCA unknown', 'default');
+  }
 };
-
-const isRcaIssue = (issue) =>
-  (issue.fields.labels ?? []).includes(RCA_LABEL);
-
-const isCompleted = (issue) =>
-  issue.fields.status?.statusCategory?.key === 'done';
 
 export const handler = async (payload) => {
   const issueKey = payload?.extension?.issue?.key;
@@ -79,23 +84,9 @@ export const handler = async (payload) => {
       .map((result) => result.value);
 
     const rcaIssues = linkedIssues.filter(isRcaIssue);
+    const rcaStatus = calculateRcaStatus(rcaIssues);
 
-    if (rcaIssues.length === 0) {
-      return createStatus('RCA missing', 'removed');
-    }
-
-    if (rcaIssues.length > 1) {
-      return createStatus(
-        `Multiple RCA: ${rcaIssues.length}`,
-        'moved'
-      );
-    }
-
-    if (isCompleted(rcaIssues[0])) {
-      return createStatus('RCA completed', 'success');
-    }
-
-    return createStatus('RCA incomplete', 'inprogress');
+    return createRcaStatus(rcaStatus, rcaIssues.length);
   } catch (error) {
     console.error(
       `Failed to calculate RCA status for ${issueKey}`,

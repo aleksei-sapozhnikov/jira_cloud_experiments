@@ -9,7 +9,7 @@ import {
   calculateRcaStatus,
   getLinkedIssueKeys,
   isRcaIssue,
-} from './rca-status';
+} from '../shared/rca-status';
 
 const createStatus = (label, type) => ({
   status: {

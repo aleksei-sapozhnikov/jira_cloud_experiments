@@ -17,7 +17,7 @@ import {
   calculateRcaStatus,
   getLinkedIssueKeys,
   isRcaIssue,
-} from '../rca-status';
+} from '../shared/rca-status';
 
 const fetchIssue = async (issueKey, fields) => {
   const fieldsParameter = encodeURIComponent(fields.join(','));

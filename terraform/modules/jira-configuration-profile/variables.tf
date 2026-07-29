@@ -38,18 +38,21 @@ variable "profile" {
       description = optional(string)
 
       create = object({
-        name   = string
-        fields = list(string)
+        name     = string
+        tab_name = optional(string, "Default")
+        fields   = list(string)
       })
 
       edit = object({
-        name   = string
-        fields = list(string)
+        name     = string
+        tab_name = optional(string, "Default")
+        fields   = list(string)
       })
 
       view = object({
-        name   = string
-        fields = list(string)
+        name     = string
+        tab_name = optional(string, "Default")
+        fields   = list(string)
       })
     })
 
@@ -74,6 +77,19 @@ variable "profile" {
     ])
 
     error_message = "Workflow status names must not be empty."
+  }
+
+  validation {
+    condition = alltrue([
+      for screen in [
+        var.profile.screens.create,
+        var.profile.screens.edit,
+        var.profile.screens.view
+      ] :
+      length(trimspace(screen.tab_name)) > 0
+    ])
+
+    error_message = "Screen tab names must not be empty."
   }
 
   validation {

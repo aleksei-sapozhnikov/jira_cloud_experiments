@@ -158,7 +158,7 @@ resource "atlassian_jira_screen" "this" {
   description = try(var.profile.screens.description, null)
 
   tab {
-    name   = "Default"
+    name   = each.value.tab_name
     fields = each.value.fields
   }
 }

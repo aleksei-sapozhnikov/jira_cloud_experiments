@@ -44,6 +44,7 @@
       "description": "Standard create, edit and view screens managed by Terraform",
       "create": {
         "name": "Terraform Standard Create Screen",
+        "tab_name": "Details",
         "fields": [
           "summary",
           "issuetype",
@@ -56,6 +57,7 @@
       },
       "edit": {
         "name": "Terraform Standard Edit Screen",
+        "tab_name": "Details",
         "fields": [
           "summary",
           "issuetype",
@@ -68,6 +70,7 @@
       },
       "view": {
         "name": "Terraform Standard View Screen",
+        "tab_name": "Details",
         "fields": [
           "summary",
           "issuetype",

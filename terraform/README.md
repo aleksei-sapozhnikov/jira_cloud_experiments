@@ -104,7 +104,8 @@ Defines reusable Jira configuration objects such as:
 
 - statuses and workflow transitions;
 - workflow scheme;
-- create/edit/view screens;
+- create/edit/view screens, including the name and ordered fields of their
+  primary tabs;
 - issue-type screen scheme;
 - required and hidden fields;
 - field-configuration scheme;
@@ -418,6 +419,31 @@ For the interview demonstration:
   profile JSON. The separate workflow Resolution module updates only native
   Resolution actions while preserving those rules; it does not own transition
   topology.
+- Screen tab names are configurable through `screens.*.tab_name` (`Default`
+  when omitted). This option was exposed after reproducing an update defect in
+  provider `gothub97/atlassian` 0.4.0: when only a tab's fields drift, the
+  provider first tries to rename the tab to its unchanged name. Jira rejects
+  that request with `Tab Default already exists`, so field synchronization is
+  never reached. As of July 30, 2026, the same unconditional rename remains in
+  the provider's
+  [`resource_screen.go`](https://github.com/gothub97/terraform-provider-atlassian/blob/v0.4.0/internal/jira/resource_screen.go#L501-L518):
+
+  ```go
+  renameReq := screenTabUpdateRequest{Name: desiredTabs[i].name}
+  if err := r.client.Put(
+      ctx,
+      fmt.Sprintf("/rest/api/3/screens/%s/tabs/%s", screenID, tabID),
+      renameReq,
+      nil,
+  ); err != nil {
+      // The provider returns before r.syncTabFields(...) is called.
+  }
+  ```
+
+  Changing `tab_name` performs a real rename and allows the provider to continue
+  to its own field synchronization. This demonstrates that the declared fields
+  and Jira API are valid, but it does not fix later field-only updates after the
+  new name has been applied.
 - Jira Free does not allow creation of custom permission schemes. The supplied profile therefore disables permission-scheme creation.
 - An issue-type screen scheme controls screens per work type; it is different from an issue-type scheme that controls which work types exist in the project.
 - Team-managed spaces do not use the same shared scheme model as company-managed spaces, so reusable scheme profiles are applied only to company-managed spaces.

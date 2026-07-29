@@ -2,8 +2,6 @@ modules:
   jira:issueContext:
     - key: incident-rca-status-context
       resource: main
-      resolver:
-        function: resolver
       render: native
       title: Status
       label: Incident / RCA
@@ -19,8 +17,6 @@ modules:
           issueType: Incident
           projectKey: TFCLS
   function:
-    - key: resolver
-      handler: index.handler
     - key: dynamic-properties
       handler: dynamic-properties.handler
 resources:
